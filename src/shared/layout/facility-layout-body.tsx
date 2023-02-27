@@ -29,9 +29,9 @@ export const FacilityLayoutBody = (props: any) => {
 
     return (
         <>
-            <div className="h-screen w-screen bg-gray-100 dark:bg-gray-800/30">
+            <div className="h-screen w-screen dark:bg-gray-800/50 overflow-auto">
                 <div className="flex flex-col h-full w-full">
-                    <div className="h-[95px] border bg-white dark:bg-gray-800 dark:border-gray-900 w-full px-5">
+                    <div className="h-[95px] border bg-white dark:bg-gray-800 dark:border-gray-800 w-full px-5">
                         <div className="lg:block max-lg:hidden w-full h-full">
                             <div className="w-full h-full flex justify-between">
                                 <div className="h-full flex space-x-5">
@@ -72,7 +72,7 @@ export const FacilityLayoutBody = (props: any) => {
                                             <PiIconButton onClick={() => navigate(-1)} size={'small'} icon={'pi pi-arrow-left'}/>
                                         }
                                         <h1 className="h-full flex flex-wrap content-center text-base font-bold leading-3 text-gray-600 dark:text-white">
-                                            Review.it
+                                            tollecare
                                         </h1>
                                     </div>
                                 </div>

@@ -37,7 +37,7 @@ export function FacilitySignIn() {
         }
         setLoading(true);
         const url = environment.apiUrl;
-        fetch(`${url}Account/AccountLogin`, {
+        fetch(`${url}Account/Login`, {
             method: 'POST',
             body: JSON.stringify(loginForm),
             headers: {
@@ -45,7 +45,7 @@ export function FacilitySignIn() {
             }
         }).then((response) => {
             response.json().then((result: ApiResponse<LoginResponseModel>) => {
-                if (result.status === 200) {
+                if (result.status === 100) {
                     // openMessageHandler({type: "success", message: result.message, open: true});
                     BaseService.setSessionData(result.data);
                     navigate('/facility/dashboard')

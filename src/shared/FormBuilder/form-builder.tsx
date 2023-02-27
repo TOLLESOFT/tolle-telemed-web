@@ -1,18 +1,22 @@
+
+import {PiButton, PiImagePicker, PiInput, PiSelectList, PiTextArea} from "toll-ui-react";
+import {useCallback, useState} from "react";
 import {FormItem} from "./form-item";
-import {PiButton, PiInput, PiTextArea} from "toll-ui-react";
-import {useCallback, useEffect, useState} from "react";
 
 interface Props {
     form: FormItem[];
     onFormSubmit: (value?: any) => void;
     loading: boolean;
+    title?: string;
 }
 export  const FormBuilder = (props: Props) => {
 
     const [forms, setForm] = useState<FormItem[]>(props.form);
 
     const onSubmitHandler = useCallback((event?: any) => {
-        event.preventDefault();
+        if (event) {
+            event.preventDefault();
+        }
         let errorCount = 0;
         forms.forEach((form) => {
             if (form.required) {
@@ -26,13 +30,13 @@ export  const FormBuilder = (props: Props) => {
         setForm([...forms]);
 
         if (errorCount === 0) {
-            props.onFormSubmit(forms.map((item) => {
-                return { [item.id]: item.value }
-            }));
+            props.onFormSubmit(forms.reduce((item, currentValue) => {
+                return { ...item, [currentValue.id]: currentValue.value };
+            }, {}));
         }
     }, [forms, props.form]);
 
-    const formOnChange = useCallback((event: any, type: 'text' | 'textarea' | 'checkbox' | 'image' | 'date' | 'email' | 'number' | 'password', index: number) => {
+    const formOnChange = useCallback((event: any, type: 'text' | 'textarea' | 'checkbox' | 'image'| 'date' | 'email' | 'number' | 'password' | 'list', index: number) => {
         if (type === 'text') {
             forms[index].value = event;
         }
@@ -55,41 +59,96 @@ export  const FormBuilder = (props: Props) => {
         setForm([...forms]);
     }, [forms]);
 
+    const getFiles = useCallback((images: Array<any>, form: FormItem, index: number) => {
+        if (images.length > 0) {
+            console.log(form);
+            if (form.imagePickerType === 'single') {
+               forms[index].value = images[0]?.file
+            } else {
+                forms[index].value = images
+            }
+            setForm([...forms]);
+        }
+    }, [forms])
+
+    const selectListValueChange = useCallback((event: any, form: FormItem, index: number) => {
+        forms[index].value = event;
+        setForm([...forms]);
+    }, [forms])
+
     return (
         <>
-            <div className={'flex flex-col h-full w-full'}>
-                <form className={'space-y-3'}>
-                    {
-                        forms.map((formItem, index) =>
-                            <div key={formItem.id}>
-                                {
-                                    formItem.type === 'text' &&
-                                    <PiInput
-                                        label={formItem.label}
-                                        rounded={'rounded'}
-                                        value={formItem.value}
-                                        invalid={formItem.invalid}
-                                        id={formItem.label}
-                                        required={formItem.required}
-                                        onChange={(e) => {formOnChange(e, formItem.type, index)}}/>
-                                }
-                                {
-                                    formItem.type === 'textarea' &&
-                                    <PiTextArea
-                                        label={formItem.label}
-                                        rounded={'rounded'}
-                                        value={formItem.value}
-                                        id={formItem.label}
-                                        invalid={formItem.invalid}
-                                        required={formItem.required}
-                                        onChange={(e) => {formOnChange(e, formItem.type, index)}}/>
-                                }
-                            </div>
-                        )
-                    }
-                    <PiButton loading={props.loading} rounded={'rounded'} type={'primary'} size={'normal'} onClick={onSubmitHandler}>Submit</PiButton>
-                </form>
-            </div>
+            <h1>
+                {props.title?.toUpperCase()}
+            </h1>
+            <form className={'space-y-3'}>
+                {
+                    forms.map((formItem, index) =>
+                        <div key={formItem.id}>
+                            {
+                                formItem.type === 'text' &&
+                                <PiInput
+                                    label={formItem.label}
+                                    rounded={'rounded'}
+                                    value={formItem.value}
+                                    invalid={formItem.invalid}
+                                    id={formItem.label}
+                                    required={formItem.required}
+                                    onChange={(e) => {formOnChange(e, formItem.type, index)}}/>
+                            }
+                            {
+                                formItem.type === 'number' &&
+                                <PiInput
+                                    label={formItem.label}
+                                    rounded={'rounded'}
+                                    value={formItem.value}
+                                    invalid={formItem.invalid}
+                                    type={'number'}
+                                    id={formItem.label}
+                                    required={formItem.required}
+                                    onChange={(e) => {formOnChange(e, formItem.type, index)}}/>
+                            }
+                            {
+                                formItem.type === 'textarea' &&
+                                <PiTextArea
+                                    label={formItem.label}
+                                    rounded={'rounded'}
+                                    value={formItem.value}
+                                    id={formItem.label}
+                                    invalid={formItem.invalid}
+                                    required={formItem.required}
+                                    onChange={(e) => {formOnChange(e, formItem.type, index)}}/>
+                            }
+                            {
+                                formItem.type === 'image' &&
+                                <PiImagePicker
+                                    label={formItem.label}
+                                    onImageAdded={(e) => getFiles(e, formItem, index)}
+                                    // @ts-ignore
+                                    type={formItem.imagePickerType}
+                                    invalid={formItem.invalid}
+                                    required={formItem.required}
+                                    files={formItem.value ? [`${formItem.value}`] : []}
+                                    id={formItem.label} />
+                            }
+                            {
+                                formItem.type === 'list' &&
+                                <PiSelectList
+                                    rounded={'rounded'}
+                                    label={formItem.label}
+                                    onValueChange={(e) => selectListValueChange(e, formItem, index)}
+                                    data={formItem.list ?? []}
+                                    invalid={formItem.invalid}
+                                    required={formItem.required}
+                                    value={formItem.value}
+                                    dataValue={'id'}
+                                    dataLabel={'name'}/>
+                            }
+                        </div>
+                    )
+                }
+                <PiButton loading={props.loading} rounded={'rounded'} type={'primary'} size={'normal'} onClick={onSubmitHandler}>Submit</PiButton>
+            </form>
         </>
     )
 }

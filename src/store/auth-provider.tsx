@@ -11,7 +11,7 @@ export const AuthContext = React.createContext<ContextInterface>({
 export const AuthProvider = (props: any) => {
     const loginHandler = (value: LoginResponseModel) => {
         setAuth((prevState) => {
-            return {...prevState, isAuthenticated: true, accesstoken: value.accesstoken, user: value.user}
+            return {...prevState, isAuthenticated: true, accessToken: value.accessToken, user: value.user}
         })
     }
 
@@ -32,13 +32,13 @@ export const AuthProvider = (props: any) => {
         let accessObj: LoginResponseModel = JSON.parse(localStorage.getItem(BaseService.key) as string) as LoginResponseModel;
         if (accessObj) {
             interval = setInterval(() => {
-                const seconds = Math.round( BaseService.getTimeLeft(accessObj.accesstoken?.expire, new Date()));
+                const seconds = Math.round( BaseService.getTimeLeft(accessObj.accessToken?.expire, new Date()));
                 if (seconds === 0) {
                     window.location.href = '/';
                 }
             }, 3000);
             setState((prevState) => {
-                return { ...prevState, accesstoken: accessObj.accesstoken, isAuthenticated: true, canLogin: loginHandler, canLogout: logOutHandler, user: accessObj.user }
+                return { ...prevState, accessToken: accessObj.accessToken, isAuthenticated: true, canLogin: loginHandler, canLogout: logOutHandler, user: accessObj.user }
             });
             return () => clearInterval(interval);
         }

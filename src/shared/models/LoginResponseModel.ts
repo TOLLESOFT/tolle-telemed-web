@@ -2,7 +2,7 @@ import {User} from "./User";
 import {TokenModel} from "./TokenModel";
 
 export interface LoginResponseModel{
-    accesstoken?: TokenModel,
+    accessToken?: TokenModel,
     user?: User;
     
 }

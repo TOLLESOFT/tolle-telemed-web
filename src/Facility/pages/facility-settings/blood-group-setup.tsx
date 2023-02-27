@@ -1,18 +1,18 @@
-import {PiAvatar, PiButton, PiMessage, PiModal, PiSkeleton, PiSkeletonWrapper} from "toll-ui-react";
 import {environment} from "../../../shared/environment";
-import {AuthContext} from "../../../store/auth-provider";
 import {useContext, useEffect, useState} from "react";
+import {AuthContext} from "../../../store/auth-provider";
 import {ContextInterface} from "../../../shared/models/context-interface";
-import {Country} from "../../../shared/models/country";
-import {MessageProps} from "toll-ui-react/lib/components/pi-message";
-import {FormBuilder} from "../../../shared/FormBuilder/form-builder";
-import {FormItem} from "../../../shared/FormBuilder/form-item";
-import {ApiResponse} from "../../../shared/models/ApiResponse";
 import {Paging} from "../../../shared/models/paging";
 import {Filter} from "../../../shared/models/filter";
+import {FormItem} from "../../../shared/FormBuilder/form-item";
+import {MessageProps} from "toll-ui-react/lib/components/pi-message";
+import {ApiResponse} from "../../../shared/models/ApiResponse";
 import {PagedResponse} from "../../../shared/models/PagedResponse";
+import {PiButton, PiMessage, PiModal, PiSkeleton, PiSkeletonWrapper} from "toll-ui-react";
+import {FormBuilder} from "../../../shared/FormBuilder/form-builder";
+import {BloodGroup} from "../../../shared/models/blood-group";
 
-export default function CountrySetup() {
+export default function BloodGroupSetup() {
     const url = environment.apiUrl;
     const context = useContext(AuthContext);
 
@@ -25,7 +25,7 @@ export default function CountrySetup() {
 
     const [openModal, setOpenModal] = useState<boolean>(false);
 
-    const [countries, setCountries] = useState<Country[]>([]);
+    const [all, setAll] = useState<BloodGroup[]>([]);
 
     const [editState, setEditState] = useState<boolean>(false);
 
@@ -37,45 +37,10 @@ export default function CountrySetup() {
 
     const defaultForm: FormItem[] = [
         {
-            id: 'name',
+            id: 'group',
             type: "text",
             required: true,
-            label: 'Name',
-            value: ''
-        },
-        {
-            id: 'nationality',
-            type: "text",
-            label: 'Nationality',
-            required: true,
-            value: ''
-        },
-        {
-            id: 'code',
-            type: "text",
-            label: 'Code',
-            required: true,
-            value: ''
-        },
-        {
-            id: 'mainLanguage',
-            type: "text",
-            label: 'Main Language',
-            required: true,
-            value: ''
-        },
-        {
-            id: 'currencyName',
-            type: "text",
-            label: 'Currency Name',
-            required: true,
-            value: ''
-        },
-        {
-            id: 'currencySymbol',
-            type: "text",
-            label: 'Currency Symbol',
-            required: true,
+            label: 'Name of blood group',
             value: ''
         }
     ];
@@ -112,7 +77,7 @@ export default function CountrySetup() {
             return {...prevState, open: false }
         });
     }
-    const editCountry = (data: any) => {
+    const editForm = (data: any) => {
         setEditState(true);
         defaultForm.forEach((item) => {
             if (item.id === Object.values([item.id])[0]) {
@@ -142,7 +107,7 @@ export default function CountrySetup() {
 
     const saveHandler = (form: any) => {
         setLoading(true);
-        fetch(`${url}General/AddCountry`, {
+        fetch(`${url}General/AddBloodGroup`, {
             method: 'POST',
             body: JSON.stringify(form),
             headers: {
@@ -152,7 +117,7 @@ export default function CountrySetup() {
         }).then((response) => {
             response.json().then((result: ApiResponse<any>) => {
                 if (result.status === 200) {
-                    getCountriesHandler();
+                    getAllHandler();
                     closeModalHandler();
                     openMessageHandler({type: "success", message: result.message, open: true});
                 } else {
@@ -169,7 +134,7 @@ export default function CountrySetup() {
     const editHandler = (form: any) => {
         form["id"] = formId;
         setLoading(true);
-        fetch(`${url}General/EditCountry`, {
+        fetch(`${url}General/EditBloodGroup`, {
             method: 'PUT',
             body: JSON.stringify(form),
             headers: {
@@ -179,7 +144,7 @@ export default function CountrySetup() {
         }).then((response) => {
             response.json().then((result: ApiResponse<any>) => {
                 if (result.status === 200) {
-                    getCountriesHandler();
+                    getAllHandler();
                     closeModalHandler();
                     openMessageHandler({type: "success", message: result.message, open: true});
                 } else {
@@ -193,9 +158,9 @@ export default function CountrySetup() {
             openMessageHandler({type: "error", message: 'something went wrong please try again', open: true});
         });
     }
-    const getCountriesHandler = () => {
+    const getAllHandler = () => {
         setLoading(true);
-        fetch(`${url}General/Country?pageSize=${paging.pageSize}&pageNumber=${paging.pageNumber}`, {
+        fetch(`${url}General/BloodGroup`, {
             // body: JSON.stringify(filter),
             // method: 'POST',
             headers: {
@@ -203,16 +168,13 @@ export default function CountrySetup() {
                 'Authorization': `Bearer ${auth?.accessToken?.token}`
             }
         }).then((response) => {
-            response.json().then((result: PagedResponse<Array<Country>>) => {
-                const data: Array<Country> = [];
-                result.data.forEach((rate) => {
-                    data.push(rate);
-                });
-                console.log(result);
-                setCountries(data);
-                setPaging(prevState => {
-                    return { ...prevState, pageSize: result.pageSize, totalPages: result.totalPages, totalRecords: result.totalRecords, currentSize: result.data.length}
-                });
+            response.json().then((result: Array<any>) => {
+                // const data: Array<BloodGroup> = [];
+                // result.data.forEach((rate) => {
+                //     data.push(rate);
+                // });
+                // console.log(result);
+                setAll(result);
             }).finally(() => {
                 setLoading(false);
             });
@@ -234,7 +196,7 @@ export default function CountrySetup() {
     // update auth value
     useEffect(() => {
         if (auth.accessToken?.token) {
-            getCountriesHandler();
+            getAllHandler();
         }
     }, [auth]);
 
@@ -246,32 +208,29 @@ export default function CountrySetup() {
             {
                 openModal &&
                 <PiModal fullScreen={false} onClose={closeModalHandler}>
-                    <h1>New Country</h1>
+                    <h1>New Blood Group</h1>
                     <FormBuilder loading={loading} form={forms} onFormSubmit={submitHandler}/>
                 </PiModal>
             }
             <div className={'flex flex-col w-full h-full space-y-4'}>
                 <div className={'h-auto w-full flex'}>
                     <PiButton onClick={openModalHandler} type={'primary'} size={'small'} rounded={'rounded'}>
-                        <i className={'pi pi-plus'}></i> <span className={'ml-2'}>Add Country</span>
+                        <i className={'pi pi-plus'}></i> <span className={'ml-2'}>Add Blood Group</span>
                     </PiButton>
                 </div>
                 <div className={'grow w-full h-full overflow-auto'}>
                     <table className={'border-collapse w-full text-sm'}>
                         <thead>
                         <tr className="noWrap">
-                            <th className={'border border-slate-600'}>NAME</th>
-                            <th className={'border border-slate-600'}>NATIONALITY</th>
-                            <th className={'border border-slate-600'}>LANGUAGE</th>
-                            <th className={'border border-slate-600'}>CURRENCY</th>
-                            <th className={'border border-slate-600'}>CURRENCY SYMBOL</th>
+                            <th className={'border border-slate-600'}>GROUP</th>
+                            <th className={'border border-slate-600'}></th>
                         </tr>
                         </thead>
                         <tbody>
                         {
                             loading &&
                             <tr>
-                                <td colSpan={5}>
+                                <td colSpan={2}>
                                     <div className={'flex justify-center w-full'}>
                                         <h1>loading ...</h1>
                                     </div>
@@ -279,16 +238,15 @@ export default function CountrySetup() {
                             </tr>
                         }
                         {
-                            countries.length > 0 && !loading &&
+                            all.length > 0 && !loading &&
                             <>
                                 {
-                                    countries.map((country) =>
-                                        <tr key={country.id}>
-                                            <td className={'border-slate-700 border p-1'}> {country.name}</td>
-                                            <td className={'border-slate-700 border p-1'}> {country.nationality}</td>
-                                            <td className={'border-slate-700 border p-1'}> {country.mainLanguage}</td>
-                                            <td className={'border-slate-700 border p-1'}> {country.currencyName}</td>
-                                            <td className={'border-slate-700 border p-1'}> {country.currencySymbol}</td>
+                                    all.map((group) =>
+                                        <tr key={group.id}>
+                                            <td className={'border-slate-700 border p-1'}> {group.group}</td>
+                                            <td className={'border-slate-700 border p-1'}>
+                                                <PiButton rounded={'rounded'} size={'extra small'} type={'success'} onClick={() => {editForm(group)}}>EDIT</PiButton>
+                                            </td>
                                         </tr>
                                     )
                                 }
