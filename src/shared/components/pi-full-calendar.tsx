@@ -61,26 +61,13 @@ export const PiFullCalendar = (props: Props) => {
     const DaysInMonth = (year: number, month: number) => {
         const date = new Date(year, month, 1);
         setMonthYear(`${GetMonth(date)} ${year}`)
-        setMonth( GetMonth(date));
+        setMonth(GetMonth(date));
         setMonthCount(month);
         setSelectedYear(year)
         const days = [];
         while (date.getMonth() === month) {
             days.push(new Date(date));
             date.setDate(date.getDate() + 1);
-        }
-        return days;
-    }
-    const DaysInMonthUTC = (year: number, month: number) => {
-        const date = new Date(Date.UTC(year, month, 1));
-        setMonthYear(`${GetMonth(date)} ${year}`)
-        setMonth( GetMonth(date))
-        setMonth(month)
-        setSelectedYear(year);
-        const days = [];
-        while (date.getUTCMonth() === month) {
-            days.push(new Date(date));
-            date.setDate(date.getUTCDate() + 1);
         }
         return days;
     }
@@ -281,10 +268,10 @@ export const PiFullCalendar = (props: Props) => {
                             <div ref={gridRef} className={'flex flex-col h-full w-full'}>
                                 {
                                     weeks.map((dates, index) =>
-                                        <>
+                                        <div key={BaseService.uuid()}>
                                             {
                                                 dates.week !== null &&
-                                                <div key={BaseService.uuid()} className="grid grid-cols-7 w-full">
+                                                <div className="grid grid-cols-7 w-full">
                                                     {
                                                         dates.dates.map((date) =>
                                                             <div
@@ -295,7 +282,7 @@ export const PiFullCalendar = (props: Props) => {
                                                                     date !== null &&
                                                                     <div className={`flex flex-col w-full h-full group-hover:cursor-pointer 
                                                                             ${getToday(date) ? 'bg-blue-200 dark:bg-blue-500' :
-                                                                        (monthCount !== date.getMonth() && 'pointer-events-none bg-blue-200 dark:bg-gray-700/50')}`}>
+                                                                        (monthCount !== date.getMonth() && 'bg-blue-200 dark:bg-gray-700/50')}`}>
                                                                         <div className="flex justify-end p-1.5 group-hover:cursor-pointer">
                                                                             {GetDate(date)}
                                                                         </div>
@@ -306,7 +293,7 @@ export const PiFullCalendar = (props: Props) => {
                                                     }
                                                 </div>
                                             }
-                                        </>
+                                        </div>
                                     )
                                 }
                             </div>

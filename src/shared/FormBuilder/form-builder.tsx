@@ -5,7 +5,7 @@ import {FormItem} from "./form-item";
 
 interface Props {
     form: FormItem[];
-    onFormSubmit: (value?: any) => void;
+    onFormSubmit?: (value?: any) => void;
     loading: boolean;
     title?: string;
 }
@@ -30,7 +30,7 @@ export  const FormBuilder = (props: Props) => {
         setForm([...forms]);
 
         if (errorCount === 0) {
-            props.onFormSubmit(forms.reduce((item, currentValue) => {
+            props.onFormSubmit?.(forms.reduce((item, currentValue) => {
                 return { ...item, [currentValue.id]: currentValue.value };
             }, {}));
         }

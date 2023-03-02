@@ -1,14 +1,19 @@
-import {useEffect, useRef, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import getWeek from "date-fns/getWeek";
 import {format} from "date-fns";
-import {PiButton, PiIconButton} from "toll-ui-react";
-import {BaseService} from "../base.service";
+import {PiButton} from "toll-ui-react";
+
+interface Props {
+    date?: any
+    disablePastDates?: boolean
+    onChange?: (value?: Date) => void
+}
 
 interface Week {
     dates: Date[];
     week: number;
 }
-export const PiCalendar = () => {
+export const PiCalendar = (prop: Props) => {
     const calendarView: 'month' | 'all month' | 'year' = 'month';
     const AllDays: any[] = [
         'SUNDAY',
@@ -19,7 +24,6 @@ export const PiCalendar = () => {
         'FRIDAY',
         'SATURDAY'
     ];
-
     const AllMonths: string[] = [
         'JANUARY',
         'FEBRUARY',
@@ -37,46 +41,23 @@ export const PiCalendar = () => {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [getCalendarView, setCalendarView] = useState<string>(calendarView);
     const [selectedYear, setSelectedYear] = useState<any>();
-    const [monthYear, setMonthYear] = useState<any>();
     const [month, setMonth] = useState<any>();
-    const [currentWeek, setCurrentWeek] = useState<Week>();
-    const [currentMonth, setCurrentMonth] = useState<Week[]>([]);
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
-    const today = new Date();
-    const [useUTC, setUseUTC] = useState<boolean>(false);
-    const [disablePastDates, setDisablePastDates] = useState<boolean>(false);
+    const [today, setTodayDate] = useState<Date>(new Date());
     const [monthCount, setMonthCount] = useState<number>(0);
     const [weeks, setWeeks] = useState<Week[]>([]);
     const [allDates, setAllDates] = useState<Date[]>([]);
-    const gridRef = useRef(null);
-    const [boxHeight, setBoxHeight] = useState<any>(0);
+    const [years, setYears] = useState<number[]>([]);
 
     const GetMonth = (date: Date) => {
         return AllMonths[date.getMonth()];
     }
-    const DaysInMonth = (year: number, month: number) => {
+    const getDaysInMonth = (year: number, month: number) => {
         const date = new Date(year, month, 1);
-        setMonthYear(`${GetMonth(date)} ${year}`)
-        setMonth( GetMonth(date));
-        setMonthCount(month);
-        setSelectedYear(year)
         const days = [];
         while (date.getMonth() === month) {
             days.push(new Date(date));
             date.setDate(date.getDate() + 1);
-        }
-        return days;
-    }
-    const DaysInMonthUTC = (year: number, month: number) => {
-        const date = new Date(Date.UTC(year, month, 1));
-        setMonthYear(`${GetMonth(date)} ${year}`)
-        setMonth( GetMonth(date))
-        setMonth(month)
-        setSelectedYear(year);
-        const days = [];
-        while (date.getUTCMonth() === month) {
-            days.push(new Date(date));
-            date.setDate(date.getUTCDate() + 1);
         }
         return days;
     }
@@ -105,11 +86,11 @@ export const PiCalendar = () => {
                 const newArray = new Array(item.getDay());
                 let days: Date[] = [];
                 if (item.getMonth() === 0) {
-                    days = DaysInMonth(item.getFullYear()- 1, 11)
+                    days = getDaysInMonth(item.getFullYear()- 1, 11)
                 } else if (item.getMonth() === 11) {
-                    days = DaysInMonth(item.getFullYear()+ 1, 0)
+                    days = getDaysInMonth(item.getFullYear()+ 1, 0)
                 } else {
-                    days = DaysInMonth(item.getFullYear(), item.getMonth() - 1)
+                    days = getDaysInMonth(item.getFullYear(), item.getMonth() - 1)
                 }
                 for (let x = 0; x < newArray.length; x++) {
                     const sub = newArray.length - x;
@@ -131,9 +112,9 @@ export const PiCalendar = () => {
                 const newArray = new Array(6 - lastWeek[i-1].getDay());
                 let days: Date[] = [];
                 if (lastWeek[i-1].getMonth() === 11) {
-                    days = DaysInMonth(lastWeek[i-1].getFullYear() + 1, 0)
+                    days = getDaysInMonth(lastWeek[i-1].getFullYear() + 1, 0)
                 } else {
-                    days = days = DaysInMonth(lastWeek[i-1].getFullYear(), lastWeek[i-1].getMonth() + 1)
+                    days = days = getDaysInMonth(lastWeek[i-1].getFullYear(), lastWeek[i-1].getMonth() + 1)
                 }
                 for (let x = 0; x < newArray.length; x++) {
                     lastWeek.push(new Date(days[x]));
@@ -143,57 +124,32 @@ export const PiCalendar = () => {
             }
         }
 
-        weeks.forEach((week) => {
-            week.dates.forEach((date) => {
-                if (format(new Date(date), 'MM/dd/yyyy') === format(new Date(), 'MM/dd/yyyy')) {
-                    setCurrentWeek(week);
-                    return;
-                }
-            })
-        });
-
         setWeeks([...weeks]);
-
-        const getWeeks: Week[] = [];
-
-        const days = DaysInMonth(currentDate.getFullYear(), currentDate.getMonth())
-
-        days.forEach((date) => {
-            let findDayInWeeks: Week | undefined = undefined;
-            weeks.forEach((week) => {
-                week.dates.forEach((myDate) => {
-                    if (format(new Date(myDate), 'MM/dd/yyyy') === format(new Date(date), 'MM/dd/yyyy')) {
-                        findDayInWeeks = week;
-                        return;
-                    }
-                })
-            })
-
-            if ((findDayInWeeks as unknown as Week)?.dates.length > 0) {
-                const findweek = getWeeks.find(u => u.week === (findDayInWeeks as unknown as Week).week);
-
-                if (!findweek) {
-                    getWeeks.push((findDayInWeeks as unknown as Week))
-                }
-            }
-        })
-
-        if (gridRef.current) {
-            const boxes = (gridRef.current as HTMLDivElement).clientHeight / getWeeks.length;
-            setBoxHeight(boxes);
-        }
-        setCurrentMonth(getWeeks);
     }
-    const GetDate = (date: Date) =>{
-        return date.getDate();
+    const selectMonth = (month: string) => {
+        const index = AllMonths.findIndex(u => u === month)
+        setMonthCount(index);
+        setSelectedDate(new Date(selectedDate.getFullYear(), index, 1))
+        setCurrentDate(new Date(selectedDate.getFullYear(), index, 1));
+    }
+
+    const selectYear = (year: number) => {
+        setSelectedYear(year);
+        setSelectedDate(new Date(year, selectedDate.getMonth(), 1))
+        setCurrentDate(new Date(year, selectedDate.getMonth(), 1))
     }
     const GetDefaultCalendar = () => {
-        setAllDates(DaysInMonth(
-            currentDate.getFullYear(),
-            currentDate.getMonth()
-        ));
+        setMonth(GetMonth(currentDate));
+        setMonthCount(currentDate.getMonth());
+        setSelectedYear(currentDate.getFullYear())
+        const tYears: number[] = [];
+        for(let i = 0; i < 12; i++) {
+            tYears.push(2016 + i)
+        }
+        setYears([...tYears]);
+        const days = getDaysInMonth(currentDate.getFullYear(), currentDate.getMonth())
+        setAllDates(days);
     }
-
     const GetPreviousMonth = () => {
         setMonthCount(monthCount - 1);
         if (monthCount === -1) {
@@ -207,6 +163,24 @@ export const PiCalendar = () => {
         GetDefaultCalendar();
     }
 
+    const NextYears = useCallback(() => {
+        const tYears: number[] = [];
+        for(let i = 0; i < 12; i++) {
+            tYears.push(years[years.length-1] + (i+1))
+        }
+        setYears([...tYears]);
+    }, [years])
+
+    const PrevYears = useCallback(() => {
+        if (years[0] > 1800) {
+            const tYears: number[] = [];
+            for(let i = 0; i < 12; i++) {
+                tYears.push(years[0] - (12 - i))
+            }
+            setYears([...tYears]);
+        }
+    }, [years])
+
     const GetNextMonth = () => {
         setMonthCount(monthCount + 1);
         if (monthCount === 12) {
@@ -219,19 +193,37 @@ export const PiCalendar = () => {
         }
         GetDefaultCalendar();
     }
-
-    const View = (view: 'full' | 'list') => {
-        setCalendarView(view);
-    }
-
     const getToday = (date: Date) : boolean => {
         const today = format(new Date(), 'MM/dd/yyyy');
         const current = format(date, 'MM/dd/yyyy');
         return today === current;
     }
+    const setToday = () => {
+       setCurrentDate(new Date())
+    }
+    const selectDate = (date: Date) => {
+        setSelectedDate(new Date(date));
+        if (monthCount !== date.getMonth()) {
+            if (date.getMonth() > monthCount) {
+                GetNextMonth();
+            } else {
+                GetPreviousMonth();
+            }
+        }
+
+        prop.onChange?.(date);
+    }
+    const compareDate = (date: Date): boolean => {
+        return new Date(date) < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    }
 
     useEffect(() => {
-        setSelectedYear(selectedDate.getFullYear());
+        setInterval(() => {
+            setTodayDate(new Date());
+        }, 1000)
+    })
+
+    useEffect(() => {
         GetDefaultCalendar();
     }, [])
 
@@ -241,36 +233,165 @@ export const PiCalendar = () => {
         }
     }, [allDates])
 
+    useEffect(() => {
+        GetDefaultCalendar();
+    }, [currentDate])
 
     return (
-        <div className="relative flex w-[300px] p-2">
-            {
-                getCalendarView === 'month' &&
-                <div>
-                    <div className="flex justify-between px-2 mb-4">
-                        <div className="flex space-x-2 items-center">
-                            <label onClick={() => setCalendarView('all month')} className="cursor-pointer block text-[13px]">{month}</label>
-                            <div></div>
+        <>
+            <div className="relative flex w-[300px] p-2">
+                {
+                    getCalendarView === 'month' &&
+                    <div>
+                        <div className="flex justify-between px-2 mb-4">
+                            <div className="flex space-x-2 items-center">
+                                <label onClick={() => setCalendarView('all month')} className="cursor-pointer block text-[13px]">{month}</label>
+                                <label onClick={() => setCalendarView('year')} className="cursor-pointer block text-[13px]">{selectedYear}</label>
+                            </div>
+                            <div className="flex space-x-2 items-center">
+                                <i onClick={GetPreviousMonth} className="cursor-pointer text-gray-500 text-[13px] pi pi-chevron-left"></i>
+                                <i onClick={GetNextMonth} className="cursor-pointer text-gray-500 text-[13px] pi pi-chevron-right"></i>
+                            </div>
                         </div>
-                        <div className="flex space-x-2 items-center">
-                            <i onClick={GetPreviousMonth} className="cursor-pointer text-gray-500 text-[13px] pi pi-chevron-left"></i>
-                            <i onClick={GetNextMonth} className="cursor-pointer text-gray-500 text-[13px] pi pi-chevron-right"></i>
+                        <div className="h-auto flex items-center">
+                            {
+                                AllDays.map(days =>
+                                    <div key={days} className="w-10 h-10 flex items-center justify-center">
+                                        <span className="leading-none block text-gray-400 text-[12px]">{days.slice(0, 1)}</span>
+                                    </div>
+                                )
+                            }
+                        </div>
+                        <div className="border-gray-300 overflow-hidden divide-y">
+                            {
+                                weeks.map((week, index) =>
+                                    <div key={index}>
+                                        {
+                                            week.week !== null &&
+                                            <div  className={'flex'}>
+                                                {
+                                                    week.dates.map((date) =>
+                                                        <div key={`${date}`} className="w-10 h-10 flex items-center justify-center">
+                                                            {
+                                                                format(new Date(selectedDate), 'MM/dd/yyyy') !== format(new Date(date), 'MM/dd/yyyy') &&
+                                                                <>
+                                                                    {
+                                                                        prop.disablePastDates &&
+                                                                        <>
+                                                                            {
+                                                                                compareDate(date) &&
+                                                                                <div
+                                                                                    className="w-8 h-8 flex items-center justify-center hover:cursor-not-allowed">
+                                                                                    <label className="text-[14px] leading-none text-gray-700 hover:cursor-not-allowed">
+                                                                                        {format(new Date(date), 'dd')}
+                                                                                    </label>
+                                                                                </div>
+                                                                            }
+                                                                            {
+                                                                                !compareDate(date) &&
+                                                                                <div onClick={() => selectDate(date)} className={`w-8 h-8 flex items-center justify-center hover:cursor-pointer
+                                                                                ${getToday(date) && 'rounded-full bg-blue-500'} ${format(new Date(selectedDate), 'MM/dd/yyyy') === format(new Date(date), 'MM/dd/yyyy') && 'rounded-full bg-blue-300'}`}>
+                                                                                    <label className={`text-[14px] leading-none hover:cursor-pointer ${getToday(date) ? 'text-white' : (monthCount !== date.getMonth() && 'text-gray-500')}`}>
+                                                                                        {format(new Date(date), 'dd')}
+                                                                                    </label>
+                                                                                </div>
+                                                                            }
+                                                                        </>
+                                                                    }
+                                                                    {
+                                                                        !prop.disablePastDates &&
+                                                                        <div onClick={() => selectDate(date)} className={`w-8 h-8 flex items-center justify-center hover:cursor-pointer 
+                                                                        ${getToday(date) && 'rounded-full bg-blue-500'} ${format(new Date(selectedDate), 'MM/dd/yyyy') === format(new Date(date), 'MM/dd/yyyy') && 'rounded-full bg-blue-300'}`}>
+                                                                            <label className={`${(monthCount !== date.getMonth() && 'text-gray-500')} text-[14px] leading-none hover:cursor-pointer`}>
+                                                                                {format(new Date(date), 'dd')}
+                                                                            </label>
+                                                                        </div>
+
+                                                                    }
+                                                                </>
+                                                            }
+                                                            {
+                                                                format(new Date(selectedDate), 'MM/dd/yyyy') === format(new Date(date), 'MM/dd/yyyy') &&
+                                                                <div onClick={() => selectDate(date)} className={`w-8 h-8 flex items-center justify-center ${getToday(date) && 'rounded-full bg-blue-500'} 
+                                                                ${format(new Date(selectedDate), 'MM/dd/yyyy') === format(new Date(date), 'MM/dd/yyyy') && 'rounded-full bg-blue-400'} hover:cursor-pointer`}>
+                                                                    <label className={`
+                                                            ${(monthCount !== date.getMonth()
+                                                                        ? ((today.getMonth() < date.getMonth() && 'text-gray-500'))
+                                                                        : ((today.getMonth() > date.getMonth() && 'text-gray-700')))} text-[14px] leading-none hover:cursor-pointer`}>
+                                                                        {format(new Date(date), 'dd')}
+                                                                    </label>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    )
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                )
+                            }
+                        </div>
+                        <div className="flex justify-between px-2 mt-2 items-center">
+                            <span className={'block text-[13px]'}>today: {format(new Date(), 'MM/dd/yyyy hh:mm:ss a')}</span>
+                            <PiButton onClick={setToday} size={"extra small"} type={"primary"} rounded={"rounded"}>today</PiButton>
                         </div>
                     </div>
-                    <div className="h-auto flex items-center">
-                        {
-                            AllDays.map(days =>
-                                <div className="w-10 h-10 flex items-center justify-center">
-                                    <span className="leading-none block text-gray-400 text-[12px]">{days.slice(0, 1)}</span>
-                                </div>
-                            )
-                        }
+                }
+                {
+                    getCalendarView === 'all month' &&
+                    <div className={'w-full'}>
+                        <div className="flex justify-start px-4 mb-4">
+                            <div className="flex space-x-2 items-center">
+                                <label onClick={() => setCalendarView('month')} className="cursor-pointer block text-[13px]">BACK</label>
+                            </div>
+                        </div>
+                        <div className="border-gray-300 overflow-hidden w-full divide-y">
+                            <div className="grid grid-cols-3 w-full">
+                                {
+                                    AllMonths.map((month) =>
+                                        <div key={month} className="w-full h-14 flex items-center justify-center hover:cursor-pointer hover:bg-blue-600 hover:rounded" onClick={() => {
+                                            selectMonth(month);
+                                            setCalendarView('month');
+                                        }}>
+                                            <div className="w-8 h-8 flex items-center justify-center">
+                                                <span className="text-[14px] leading-none">{month.slice(0,3)}</span >
+                                            </div>
+                                        </div>
+                                    )
+                                }
+                            </div>
+                        </div>
                     </div>
-                    <div className="border-gray-300 overflow-hidden divide-y">
-                        
+                }
+                {
+                    getCalendarView === 'year' &&
+                    <div className={'w-full'}>
+                        <div className="flex justify-between px-4 mb-4 items-center">
+                            <div className="flex space-x-2 items-center">
+                                <label onClick={() => setCalendarView('month')} className="cursor-pointer block text-[13px]">BACK</label>
+                            </div>
+                            <div className="flex space-x-2 items-center">
+                                <i onClick={PrevYears} className="cursor-pointer text-gray-500 text-[13px] pi pi-chevron-left"></i>
+                                <i onClick={NextYears} className="cursor-pointer text-gray-500 text-[13px] pi pi-chevron-right"></i>
+                            </div>
+                        </div>
+                        <div className="border-gray-300 overflow-hidden w-full divide-y">
+                            <div className="grid grid-cols-4 w-full">
+                                {
+                                    years.map((year) =>
+                                        <div key={year} className="w-full h-14 flex items-center justify-center hover:cursor-pointer hover:bg-blue-600 hover:rounded"
+                                             onClick={() => {selectYear(year); setCalendarView('month');}}>
+                                            <div className="w-8 h-8 flex items-center justify-center">
+                                                <span className="text-[14px] leading-none">{year}</span >
+                                            </div>
+                                        </div>
+                                    )
+                                }
+                            </div>
+                        </div>
                     </div>
-                </div>
-            }
-        </div>
+                }
+            </div>
+        </>
     )
 }

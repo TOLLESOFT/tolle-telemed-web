@@ -8,7 +8,7 @@ import {SearchBox} from "./searchbox";
 interface Props {
     lat?: any;
     lng?: any;
-    onMapMove: (coords: {lat: any, lng:any}) => void
+    onMapMove?: (coords: {lat: any, lng:any}) => void
 }
 export const MapLatLng = (props: Props) => {
     const icon = new Icon({
@@ -36,7 +36,7 @@ export const MapLatLng = (props: Props) => {
     }
 
     const updateCoordinates = (event: any) => {
-        props.onMapMove({ lat: event.lat, lng: event.lng });
+        props.onMapMove?.({ lat: event.lat, lng: event.lng });
         setMapView(event);
     }
 
@@ -73,7 +73,7 @@ export const MapLatLng = (props: Props) => {
                     if (marker) {
                         marker.setLatLng(map.getCenter());
                         setMarker(marker);
-                        props.onMapMove(map.getCenter());
+                        props.onMapMove?.(map.getCenter());
                     }
                 })
             }
