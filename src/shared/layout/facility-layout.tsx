@@ -20,7 +20,7 @@ export function FacilityLayout() {
                                     <i className={'pi pi-desktop text-base cursor-pointer'}></i>
                                     <span className={'cursor-pointer'}>Dashboard</span>
                                 </div>
-                                <div className={'flex space-x-2 items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer'}>
+                                <div onClick={() => route('/facility/appointments/pending')} className={'flex space-x-2 items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer'}>
                                     <i className={'pi pi-calendar text-base cursor-pointer'}></i>
                                     <span className={'cursor-pointer'}>Appointments</span>
                                 </div>

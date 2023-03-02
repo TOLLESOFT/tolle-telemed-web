@@ -29,6 +29,11 @@ import HealthLibraryOutlet from "./Facility/pages/facility-health-library/health
 import HealthLibraryTopics from "./Facility/pages/facility-health-library/health-library-topics";
 import UserManagementOutlet from "./Facility/pages/facility-user-management/user-management-outlet";
 import UserRoles from "./Facility/pages/facility-user-management/user-roles";
+import Users from "./Facility/pages/facility-user-management/users";
+import FacilityAppointmentsOutlet from "./Facility/pages/facility-appointments/facility-appointments-outlet";
+import FacilityAppointmentPending from "./Facility/pages/facility-appointments/facility-appointment-pending";
+import FacilityAppointmentReview from "./Facility/pages/facility-appointments/facility-appointment-review";
+import FacilityAppointmentHistory from "./Facility/pages/facility-appointments/facility-appointment-history";
 
 
 const router = createBrowserRouter([
@@ -52,6 +57,23 @@ const router = createBrowserRouter([
             {
                 path: 'facility/dashboard',
                 element: <FacilityDashboard />
+            },
+            {
+                element: <FacilityAppointmentsOutlet/>,
+                children: [
+                    {
+                        path: 'facility/appointments/pending',
+                        element: <FacilityAppointmentPending/>
+                    },
+                    {
+                        path: 'facility/appointments/reviews',
+                        element: <FacilityAppointmentReview/>
+                    },
+                    {
+                        path: 'facility/appointments/history',
+                        element: <FacilityAppointmentHistory/>
+                    }
+                ]
             },
             {
                 element: <FacilitySettings />,
@@ -121,6 +143,10 @@ const router = createBrowserRouter([
                     {
                         path: 'facility/roles',
                         element: <UserRoles />
+                    },
+                    {
+                        path: 'facility/users',
+                        element: <Users />
                     }
                 ]
             },

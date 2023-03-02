@@ -8,4 +8,6 @@ export interface FormItem{
     value: any;
     imagePickerType?: 'single' | 'multiple'
     list?: Array<any>
+    listDisplayName?: string
+    listValueName?: string
 }

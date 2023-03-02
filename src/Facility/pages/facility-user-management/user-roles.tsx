@@ -7,7 +7,7 @@ import {FormItem} from "../../../shared/FormBuilder/form-item";
 import {ApiResponse} from "../../../shared/models/ApiResponse";
 import {Role} from "../../../shared/models/Role";
 import {Paging} from "../../../shared/models/paging";
-import {PiAvatar, PiButton, PiMessage, PiModal} from "toll-ui-react";
+import { PiButton, PiMessage, PiModal} from "toll-ui-react";
 import {FormBuilder} from "../../../shared/FormBuilder/form-builder";
 import {PagedResponse} from "../../../shared/models/PagedResponse";
 import {Facility} from "../../../shared/models/Facility";

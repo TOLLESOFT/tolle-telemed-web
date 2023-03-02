@@ -94,6 +94,7 @@ export  const FormBuilder = (props: Props) => {
                                     invalid={formItem.invalid}
                                     id={formItem.label}
                                     required={formItem.required}
+                                    readOnly={formItem.disabled}
                                     onChange={(e) => {formOnChange(e, formItem.type, index)}}/>
                             }
                             {
@@ -106,6 +107,7 @@ export  const FormBuilder = (props: Props) => {
                                     type={'number'}
                                     id={formItem.label}
                                     required={formItem.required}
+                                    readOnly={formItem.disabled}
                                     onChange={(e) => {formOnChange(e, formItem.type, index)}}/>
                             }
                             {
@@ -117,6 +119,7 @@ export  const FormBuilder = (props: Props) => {
                                     id={formItem.label}
                                     invalid={formItem.invalid}
                                     required={formItem.required}
+                                    readOnly={formItem.disabled}
                                     onChange={(e) => {formOnChange(e, formItem.type, index)}}/>
                             }
                             {
@@ -128,6 +131,7 @@ export  const FormBuilder = (props: Props) => {
                                     type={formItem.imagePickerType}
                                     invalid={formItem.invalid}
                                     required={formItem.required}
+                                    readOnly={formItem.disabled}
                                     files={formItem.value ? [`${formItem.value}`] : []}
                                     id={formItem.label} />
                             }
@@ -140,9 +144,10 @@ export  const FormBuilder = (props: Props) => {
                                     data={formItem.list ?? []}
                                     invalid={formItem.invalid}
                                     required={formItem.required}
+                                    disabled={formItem.disabled}
                                     value={formItem.value}
-                                    dataValue={'id'}
-                                    dataLabel={'name'}/>
+                                    dataValue={formItem.listValueName ?? 'id'}
+                                    dataLabel={formItem.listDisplayName ?? 'name'}/>
                             }
                         </div>
                     )
