@@ -27,6 +27,7 @@ export const AuthProvider = (props: any) => {
 
     const [state, setState] = useState<ContextInterface>({ canLogout: logOutHandler, canLogin: loginHandler, isAuthenticated: false });
 
+
     useEffect(() => {
         let interval: NodeJS.Timeout | undefined;
         let accessObj: LoginResponseModel = JSON.parse(localStorage.getItem(BaseService.key) as string) as LoginResponseModel;

@@ -8,7 +8,7 @@ interface Props {
   label?: string
   required?: boolean
   placeholder?: string
-  onValueChange: (event: any) => void
+  onValueChange?: (event: any) => void
   readOnly?: boolean
   invalid?: boolean
   allowSearch?: boolean
@@ -38,7 +38,7 @@ export const SearchBox = (props: Props) => {
   )
 
   const selectItem = (item: any) => {
-    props.onValueChange({lat: item.lat, lng: item.long})
+    props.onValueChange?.({lat: item.lat, lng: item.long})
   }
 
   const onDisplayModelChange = (event: any) => {
@@ -131,7 +131,6 @@ export const SearchBox = (props: Props) => {
   }
 
   useEffect(() => {
-
     document.addEventListener('click', myEvent)
 
     return () => document.removeEventListener('click', myEvent)

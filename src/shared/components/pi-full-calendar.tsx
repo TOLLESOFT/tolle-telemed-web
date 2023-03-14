@@ -6,13 +6,25 @@ import {format} from "date-fns";
 
 interface Props {
     date?: any
+    onChange?: (value?: Date) => void
+    events?: Events[]
+    customListView?: boolean
+    onViewChange?: (view: any) => void
+    onEventClick?: (event: Events) => void
+    showViewButtons?: boolean
 }
 
 interface Week {
     dates: Date[];
     week: number;
 }
-export const PiFullCalendar = (props: Props) => {
+
+export interface Events {
+    id: string
+    name: string
+    date: Date
+}
+export const PiFullCalendar = (prop: Props) => {
     const fullCalendarView: 'full' | 'list'  = 'full';
     const AllDays: any[] = [
         'SUNDAY',
@@ -41,29 +53,32 @@ export const PiFullCalendar = (props: Props) => {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [getCalendarView, setCalendarView] = useState<string>(fullCalendarView);
     const [selectedYear, setSelectedYear] = useState<any>();
-    const [monthYear, setMonthYear] = useState<any>();
     const [month, setMonth] = useState<any>();
-    const [currentWeek, setCurrentWeek] = useState<Week>();
-    const [currentMonth, setCurrentMonth] = useState<Week[]>([]);
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
-    const today = new Date();
-    const [useUTC, setUseUTC] = useState<boolean>(false);
-    const [disablePastDates, setDisablePastDates] = useState<boolean>(false);
     const [monthCount, setMonthCount] = useState<number>(0);
     const [weeks, setWeeks] = useState<Week[]>([]);
     const [allDates, setAllDates] = useState<Date[]>([]);
     const gridRef = useRef(null);
     const [boxHeight, setBoxHeight] = useState<any>(0);
-    
+    const [events, setEvents] = useState<Array<Events>>([])
     const GetMonth = (date: Date) => {
         return AllMonths[date.getMonth()];
     }
-    const DaysInMonth = (year: number, month: number) => {
+    const selectDate = (date: Date) => {
+        setSelectedDate(new Date(date));
+        if (monthCount !== date.getMonth()) {
+            if (date.getMonth() > monthCount) {
+                GetNextMonth();
+            } else {
+                GetPreviousMonth();
+            }
+        }
+
+        prop.onChange?.(date);
+    }
+
+    const getDaysInMonth = (year: number, month: number) => {
         const date = new Date(year, month, 1);
-        setMonthYear(`${GetMonth(date)} ${year}`)
-        setMonth(GetMonth(date));
-        setMonthCount(month);
-        setSelectedYear(year)
         const days = [];
         while (date.getMonth() === month) {
             days.push(new Date(date));
@@ -96,11 +111,11 @@ export const PiFullCalendar = (props: Props) => {
                 const newArray = new Array(item.getDay());
                 let days: Date[] = [];
                 if (item.getMonth() === 0) {
-                    days = DaysInMonth(item.getFullYear()- 1, 11)
+                    days = getDaysInMonth(item.getFullYear()- 1, 11)
                 } else if (item.getMonth() === 11) {
-                    days = DaysInMonth(item.getFullYear()+ 1, 0)
+                    days = getDaysInMonth(item.getFullYear()+ 1, 0)
                 } else {
-                    days = DaysInMonth(item.getFullYear(), item.getMonth() - 1)
+                    days = getDaysInMonth(item.getFullYear(), item.getMonth() - 1)
                 }
                 for (let x = 0; x < newArray.length; x++) {
                     const sub = newArray.length - x;
@@ -122,9 +137,9 @@ export const PiFullCalendar = (props: Props) => {
                 const newArray = new Array(6 - lastWeek[i-1].getDay());
                 let days: Date[] = [];
                 if (lastWeek[i-1].getMonth() === 11) {
-                    days = DaysInMonth(lastWeek[i-1].getFullYear() + 1, 0)
+                    days = getDaysInMonth(lastWeek[i-1].getFullYear() + 1, 0)
                 } else {
-                    days = days = DaysInMonth(lastWeek[i-1].getFullYear(), lastWeek[i-1].getMonth() + 1)
+                    days = days = getDaysInMonth(lastWeek[i-1].getFullYear(), lastWeek[i-1].getMonth() + 1)
                 }
                 for (let x = 0; x < newArray.length; x++) {
                     lastWeek.push(new Date(days[x]));
@@ -134,20 +149,11 @@ export const PiFullCalendar = (props: Props) => {
             }
         }
 
-        weeks.forEach((week) => {
-            week.dates.forEach((date) => {
-                if (format(new Date(date), 'MM/dd/yyyy') === format(new Date(), 'MM/dd/yyyy')) {
-                    setCurrentWeek(week);
-                    return;
-                }
-            })
-        });
-
         setWeeks([...weeks]);
 
         const getWeeks: Week[] = [];
 
-        const days = DaysInMonth(currentDate.getFullYear(), currentDate.getMonth())
+        const days = getDaysInMonth(currentDate.getFullYear(), currentDate.getMonth())
 
         days.forEach((date) => {
             let findDayInWeeks: Week | undefined = undefined;
@@ -173,23 +179,22 @@ export const PiFullCalendar = (props: Props) => {
             const boxes = (gridRef.current as HTMLDivElement).clientHeight / getWeeks.length;
             setBoxHeight(boxes);
         }
-        setCurrentMonth(getWeeks);
     }
     const GetDate = (date: Date) =>{
         return date.getDate();
     }
     const GetDefaultCalendar = () => {
-        setAllDates(DaysInMonth(
-            currentDate.getFullYear(),
-            currentDate.getMonth()
-        ));
+        setMonth(GetMonth(currentDate));
+        setMonthCount(currentDate.getMonth());
+        setSelectedYear(currentDate.getFullYear())
+        const days = getDaysInMonth(currentDate.getFullYear(), currentDate.getMonth())
+        setAllDates(days);
     }
-
     const GetPreviousMonth = () => {
         setMonthCount(monthCount - 1);
         if (monthCount === -1) {
-           setMonthCount(11);
-           setCurrentDate(new Date(currentDate.getFullYear() - 1, 11, 1))
+            setMonthCount(11);
+            setCurrentDate(new Date(currentDate.getFullYear() - 1, 11, 1))
             setSelectedYear(currentDate.getFullYear())
         } else {
             currentDate.setMonth(currentDate.getMonth() - 1);
@@ -197,7 +202,6 @@ export const PiFullCalendar = (props: Props) => {
         }
         GetDefaultCalendar();
     }
-
     const GetNextMonth = () => {
         setMonthCount(monthCount + 1);
         if (monthCount === 12) {
@@ -210,7 +214,6 @@ export const PiFullCalendar = (props: Props) => {
         }
         GetDefaultCalendar();
     }
-
     const View = (view: 'full' | 'list') => {
         setCalendarView(view);
     }
@@ -221,8 +224,16 @@ export const PiFullCalendar = (props: Props) => {
         return today === current;
     }
 
+    const setDate = (date: Date) => {
+        setCurrentDate(new Date(date));
+        setSelectedDate(new Date(date));
+    }
+
+    const setToday = () => {
+        setCurrentDate(new Date())
+    }
+
     useEffect(() => {
-        setSelectedYear(selectedDate.getFullYear());
         GetDefaultCalendar();
     }, [])
 
@@ -232,6 +243,19 @@ export const PiFullCalendar = (props: Props) => {
         }
     }, [allDates])
 
+    useEffect(() => {
+        if (prop.date) {
+            setDate(new Date(prop.date));
+        }
+    }, [prop.date])
+
+    useEffect(() => {
+        GetDefaultCalendar();
+    }, [currentDate])
+
+    useEffect(() => {
+        setEvents(prop.events as Events[]);
+    }, [prop.events])
 
     return (
         <div className="relative flex flex-col w-full h-full">
@@ -240,12 +264,17 @@ export const PiFullCalendar = (props: Props) => {
                     <div className="space-x-1 flex items-center">
                         <PiIconButton onClick={GetPreviousMonth} icon={'pi pi-arrow-left'} size={'small'} type={'primary'} rounded={'rounded'}/>
                         <PiIconButton onClick={GetNextMonth} icon={'pi pi-arrow-right'} size={'small'} type={'primary'} rounded={'rounded'}/>
-                        <PiButton onClick={() => {}} size={'small'} type={'primary'} rounded={'rounded'}>today</PiButton>
+                        <PiButton onClick={setToday} size={'small'} type={'primary'} rounded={'rounded'}>today</PiButton>
                     </div>
-                    <span className={'block font-bold'}>{monthYear}</span>
+                    <span className={'block font-bold'}>{month} {selectedYear}</span>
                     <div className="space-x-1 flex items-center">
-                        <PiButton onClick={() => View('full')} size={'small'} type={'primary'} rounded={'rounded'}>calendar</PiButton>
-                        <PiButton onClick={() => View('list')} size={'small'} type={'primary'} rounded={'rounded'}>list</PiButton>
+                        {
+                            prop.showViewButtons &&
+                           <>
+                               <PiButton onClick={() => View('full')} size={'small'} type={'primary'} rounded={'rounded'}>calendar</PiButton>
+                               <PiButton onClick={() => View('list')} size={'small'} type={'primary'} rounded={'rounded'}>list</PiButton>
+                           </>
+                        }
                     </div>
                 </div>
             </div>
@@ -267,7 +296,7 @@ export const PiFullCalendar = (props: Props) => {
                         <div className={'grow h-full w-full overflow-auto feed'}>
                             <div ref={gridRef} className={'flex flex-col h-full w-full'}>
                                 {
-                                    weeks.map((dates, index) =>
+                                    weeks.map((dates) =>
                                         <div key={BaseService.uuid()}>
                                             {
                                                 dates.week !== null &&
@@ -280,12 +309,38 @@ export const PiFullCalendar = (props: Props) => {
                                                                 style={{minHeight : `${boxHeight}px`}}>
                                                                 {
                                                                     date !== null &&
-                                                                    <div className={`flex flex-col w-full h-full group-hover:cursor-pointer 
-                                                                            ${getToday(date) ? 'bg-blue-200 dark:bg-blue-500' :
-                                                                        (monthCount !== date.getMonth() && 'bg-blue-200 dark:bg-gray-700/50')}`}>
-                                                                        <div className="flex justify-end p-1.5 group-hover:cursor-pointer">
-                                                                            {GetDate(date)}
+                                                                    <div onClick={() => selectDate(date)} className={`flex flex-col w-full h-full group-hover:cursor-pointer
+                                                                    ${format(new Date(selectedDate), 'MM/dd/yyyy') === format(new Date(date), 'MM/dd/yyyy') ? 'bg-blue-500/50' : (monthCount !== date.getMonth() && 'bg-gray-700/50')}`}>
+                                                                        <div className={`flex justify-end p-3 group-hover:cursor-pointer h-auto`}>
+                                                                            <div className={`flex w-10 h-10 justify-center items-center block rounded-full ${getToday(date) && 'bg-blue-200 dark:bg-blue-500'}`}>
+                                                                                <label>
+                                                                                    {GetDate(date)}
+                                                                                </label>
+                                                                            </div>
                                                                         </div>
+
+                                                                        <>
+                                                                            {
+                                                                                events.length > 0 &&
+                                                                                <div className={'grow w-full h-full feed overflow-auto p-1'}>
+                                                                                    {
+                                                                                        events.map((event) =>
+                                                                                            <div key={event.id}>
+                                                                                                {
+                                                                                                    format(event.date, 'MM/dd/yyyy') === format(date, 'MM/dd/yyyy') &&
+                                                                                                    <small onClick={(e) => {
+                                                                                                        e.stopPropagation();
+                                                                                                        prop.onEventClick?.(event)
+                                                                                                    }} className={'w-full p-1.5 bg-blue-600 rounded block'}>
+                                                                                                        {event.name}
+                                                                                                    </small>
+                                                                                                }
+                                                                                            </div>
+                                                                                        )
+                                                                                    }
+                                                                                </div>
+                                                                            }
+                                                                        </>
                                                                     </div>
                                                                 }
                                                             </div>

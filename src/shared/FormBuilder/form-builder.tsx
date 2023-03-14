@@ -1,5 +1,5 @@
 
-import {PiButton, PiImagePicker, PiInput, PiSelectList, PiTextArea} from "toll-ui-react";
+import {PiButton, PiImagePicker, PiInput, PiSelectList, PiTextArea, PiDatepicker} from "toll-ui-react";
 import {useCallback, useState} from "react";
 import {FormItem} from "./form-item";
 
@@ -148,6 +148,12 @@ export  const FormBuilder = (props: Props) => {
                                     value={formItem.value}
                                     dataValue={formItem.listValueName ?? 'id'}
                                     dataLabel={formItem.listDisplayName ?? 'name'}/>
+                            }
+                            {
+                                formItem.type === 'date' &&
+                                <PiDatepicker
+                                    value={formItem.value}
+                                    onValueChange={(e) => {formOnChange(e, formItem.type, index)}}/>
                             }
                         </div>
                     )

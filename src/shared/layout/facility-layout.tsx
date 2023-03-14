@@ -24,7 +24,7 @@ export function FacilityLayout() {
                                     <i className={'pi pi-calendar text-base cursor-pointer'}></i>
                                     <span className={'cursor-pointer'}>Appointments</span>
                                 </div>
-                                <div className={'flex space-x-2 items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer'}>
+                                <div onClick={() => route('/facility/my-schedule')} className={'flex space-x-2 items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer'}>
                                     <i className={'pi pi-calendar-plus text-base cursor-pointer'}></i>
                                     <span className={'cursor-pointer'}>My Schedule</span>
                                 </div>
@@ -40,7 +40,7 @@ export function FacilityLayout() {
                                     <i className={'pi pi-cog text-base cursor-pointer'}></i>
                                     <span className={'cursor-pointer'}>Settings</span>
                                 </div>
-                                <div className={'flex space-x-2 items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer'}>
+                                <div onClick={() => route('/facility/schedule-configuration')} className={'flex space-x-2 items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer'}>
                                     <i className={'pi pi-sliders-h text-base cursor-pointer'}></i>
                                     <span className={'cursor-pointer'}>Schedule Configuration</span>
                                 </div>

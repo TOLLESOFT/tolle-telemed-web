@@ -34,6 +34,8 @@ import FacilityAppointmentsOutlet from "./Facility/pages/facility-appointments/f
 import FacilityAppointmentPending from "./Facility/pages/facility-appointments/facility-appointment-pending";
 import FacilityAppointmentReview from "./Facility/pages/facility-appointments/facility-appointment-review";
 import FacilityAppointmentHistory from "./Facility/pages/facility-appointments/facility-appointment-history";
+import FacilitySchedule from "./Facility/pages/facility-schedule";
+import FacilityScheduleConfiguration from "./Facility/pages/facility-schedule-configuration";
 
 
 const router = createBrowserRouter([
@@ -157,6 +159,14 @@ const router = createBrowserRouter([
             {
                 path: 'facility/pricing',
                 element: <FacilityPricing />
+            },
+            {
+                path: 'facility/my-schedule',
+                element: <FacilitySchedule />
+            },
+            {
+                path: 'facility/schedule-configuration',
+                element: <FacilityScheduleConfiguration />
             }
         ]
     }

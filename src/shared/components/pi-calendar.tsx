@@ -4,7 +4,7 @@ import {format} from "date-fns";
 import {PiButton} from "toll-ui-react";
 
 interface Props {
-    date?: any
+    date?: Date
     disablePastDates?: boolean
     onChange?: (value?: Date) => void
 }
@@ -199,10 +199,18 @@ export const PiCalendar = (prop: Props) => {
         return today === current;
     }
     const setToday = () => {
-       setCurrentDate(new Date())
+       setCurrentDate(new Date(today));
+       setSelectedDate(new Date(today));
+       prop.onChange?.(new Date(today));
     }
-    const selectDate = (date: Date) => {
+
+    const setDate = (date: Date) => {
+        setCurrentDate(new Date(date));
         setSelectedDate(new Date(date));
+    }
+
+    const selectDate = (date: Date) => {
+        setDate(new Date(date));
         if (monthCount !== date.getMonth()) {
             if (date.getMonth() > monthCount) {
                 GetNextMonth();
@@ -232,6 +240,12 @@ export const PiCalendar = (prop: Props) => {
             GetWeeks(allDates);
         }
     }, [allDates])
+
+    useEffect(() => {
+        if (prop.date) {
+            setDate(new Date(prop.date));
+        }
+    }, [prop.date])
 
     useEffect(() => {
         GetDefaultCalendar();
@@ -272,56 +286,49 @@ export const PiCalendar = (prop: Props) => {
                                                 {
                                                     week.dates.map((date) =>
                                                         <div key={`${date}`} className="w-10 h-10 flex items-center justify-center">
-                                                            {
-                                                                format(new Date(selectedDate), 'MM/dd/yyyy') !== format(new Date(date), 'MM/dd/yyyy') &&
-                                                                <>
-                                                                    {
-                                                                        prop.disablePastDates &&
-                                                                        <>
-                                                                            {
-                                                                                compareDate(date) &&
-                                                                                <div
-                                                                                    className="w-8 h-8 flex items-center justify-center hover:cursor-not-allowed">
-                                                                                    <label className="text-[14px] leading-none text-gray-700 hover:cursor-not-allowed">
-                                                                                        {format(new Date(date), 'dd')}
-                                                                                    </label>
-                                                                                </div>
-                                                                            }
-                                                                            {
-                                                                                !compareDate(date) &&
-                                                                                <div onClick={() => selectDate(date)} className={`w-8 h-8 flex items-center justify-center hover:cursor-pointer
-                                                                                ${getToday(date) && 'rounded-full bg-blue-500'} ${format(new Date(selectedDate), 'MM/dd/yyyy') === format(new Date(date), 'MM/dd/yyyy') && 'rounded-full bg-blue-300'}`}>
-                                                                                    <label className={`text-[14px] leading-none hover:cursor-pointer ${getToday(date) ? 'text-white' : (monthCount !== date.getMonth() && 'text-gray-500')}`}>
-                                                                                        {format(new Date(date), 'dd')}
-                                                                                    </label>
-                                                                                </div>
-                                                                            }
-                                                                        </>
-                                                                    }
-                                                                    {
-                                                                        !prop.disablePastDates &&
-                                                                        <div onClick={() => selectDate(date)} className={`w-8 h-8 flex items-center justify-center hover:cursor-pointer 
-                                                                        ${getToday(date) && 'rounded-full bg-blue-500'} ${format(new Date(selectedDate), 'MM/dd/yyyy') === format(new Date(date), 'MM/dd/yyyy') && 'rounded-full bg-blue-300'}`}>
-                                                                            <label className={`${(monthCount !== date.getMonth() && 'text-gray-500')} text-[14px] leading-none hover:cursor-pointer`}>
-                                                                                {format(new Date(date), 'dd')}
-                                                                            </label>
-                                                                        </div>
+                                                            <>
+                                                                {
+                                                                    prop.disablePastDates &&
+                                                                    <>
+                                                                        {
+                                                                            compareDate(date) &&
+                                                                            <div
+                                                                                className="w-8 h-8 flex items-center justify-center hover:cursor-not-allowed">
+                                                                                <label className="text-[14px] leading-none text-gray-500 hover:cursor-not-allowed">
+                                                                                    {format(new Date(date), 'dd')}
+                                                                                </label>
+                                                                            </div>
+                                                                        }
+                                                                        {
+                                                                            !compareDate(date) &&
+                                                                            <div onClick={() => selectDate(date)} className={`w-8 h-8 flex items-center justify-center hover:cursor-pointer
+                                                                                ${getToday(date) && 'rounded-full bg-blue-500'} 
+                                                                                ${monthCount !== date.getMonth() && `${getToday(date) ? 'text-white' :
+                                                                                `${format(new Date(selectedDate), 'MM/dd/yyyy') === format(new Date(date), 'MM/dd/yyyy') ? 'text-white' : 'text-gray-500'}`}`}
+                                                                                ${format(new Date(selectedDate), 'MM/dd/yyyy') === format(new Date(date), 'MM/dd/yyyy') && 'rounded-full bg-blue-400'}`}>
+                                                                                <label className={`text-[14px] leading-none hover:cursor-pointer`}>
+                                                                                    {format(new Date(date), 'dd')}
+                                                                                </label>
+                                                                            </div>
+                                                                        }
+                                                                    </>
+                                                                }
+                                                                {
+                                                                    !prop.disablePastDates &&
+                                                                    <div onClick={() => selectDate(date)} className={`w-8 h-8 flex items-center justify-center 
+                                                                        ${getToday(date) && 'rounded-full bg-blue-500'}
+                                                                        ${monthCount !== date.getMonth() && `${getToday(date) ? 'text-white' :
+                                                                        `${format(new Date(selectedDate), 'MM/dd/yyyy') === format(new Date(date), 'MM/dd/yyyy') ? 'text-white' : 'text-gray-500'}`}`}
+                                                                        ${format(new Date(selectedDate), 'MM/dd/yyyy') === format(new Date(date), 'MM/dd/yyyy') && 'rounded-full bg-blue-400'}
+                                                                        ${prop.disablePastDates ? 'hover:cursor-not-allowed' : 'hover:cursor-pointer'}`}>
+                                                                        <label className={`text-[14px] leading-none 
+                                                                            ${prop.disablePastDates ? 'hover:cursor-not-allowed' : 'hover:cursor-pointer'}`}>
+                                                                            {format(new Date(date), 'dd')}
+                                                                        </label>
+                                                                    </div>
 
-                                                                    }
-                                                                </>
-                                                            }
-                                                            {
-                                                                format(new Date(selectedDate), 'MM/dd/yyyy') === format(new Date(date), 'MM/dd/yyyy') &&
-                                                                <div onClick={() => selectDate(date)} className={`w-8 h-8 flex items-center justify-center ${getToday(date) && 'rounded-full bg-blue-500'} 
-                                                                ${format(new Date(selectedDate), 'MM/dd/yyyy') === format(new Date(date), 'MM/dd/yyyy') && 'rounded-full bg-blue-400'} hover:cursor-pointer`}>
-                                                                    <label className={`
-                                                            ${(monthCount !== date.getMonth()
-                                                                        ? ((today.getMonth() < date.getMonth() && 'text-gray-500'))
-                                                                        : ((today.getMonth() > date.getMonth() && 'text-gray-700')))} text-[14px] leading-none hover:cursor-pointer`}>
-                                                                        {format(new Date(date), 'dd')}
-                                                                    </label>
-                                                                </div>
-                                                            }
+                                                                }
+                                                            </>
                                                         </div>
                                                     )
                                                 }
