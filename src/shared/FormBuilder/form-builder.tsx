@@ -95,7 +95,7 @@ export  const FormBuilder = (props: Props) => {
                                     id={formItem.label}
                                     required={formItem.required}
                                     readOnly={formItem.disabled}
-                                    onChange={(e) => {formOnChange(e, formItem.type, index)}}/>
+                                    onChange={(e) => {formOnChange(e, formItem.type, index)}} size={"normal"}/>
                             }
                             {
                                 formItem.type === 'number' &&
@@ -108,6 +108,7 @@ export  const FormBuilder = (props: Props) => {
                                     id={formItem.label}
                                     required={formItem.required}
                                     readOnly={formItem.disabled}
+                                    size={"normal"}
                                     onChange={(e) => {formOnChange(e, formItem.type, index)}}/>
                             }
                             {

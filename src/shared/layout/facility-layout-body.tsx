@@ -55,7 +55,18 @@ export const FacilityLayoutBody = (props: any) => {
                                         <div className={'flex items-center space-x-2'}>
                                             <PiAvatar image={context?.user?.image}/>
                                             <span className={'text-base font-bold uppercase leading-3 cursor-pointer text-gray-600 dark:text-white'}>
-                                                {context?.user?.firstName} {context?.user?.lastName}
+                                                {
+                                                    context.user?.role?.normalizedName !== 'SYSTEM ADMINISTRATOR' &&
+                                                    <>
+                                                        {context?.user?.firstName} {context?.user?.lastName}
+                                                    </>
+                                                }
+                                                {
+                                                    context.user?.role?.normalizedName === 'SYSTEM ADMINISTRATOR' &&
+                                                    <>
+                                                        {context.user?.role?.normalizedName}
+                                                    </>
+                                                }
                                             </span>
                                         </div>
                                     </Link>

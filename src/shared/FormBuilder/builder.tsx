@@ -148,6 +148,7 @@ export const Builder = (props: Props) => {
                           id={formItem.props.label as string}
                           required={formItem.props.required}
                           readOnly={formItem.props.disabled}
+                          size={"normal"}
                           onChange={(e) => {formOnChange(e, formItem.type, index)}}/>
                   }
                   {

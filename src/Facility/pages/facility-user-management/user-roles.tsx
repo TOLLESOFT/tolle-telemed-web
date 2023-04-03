@@ -12,6 +12,11 @@ import {FormBuilder} from "../../../shared/FormBuilder/form-builder";
 import {PagedResponse} from "../../../shared/models/PagedResponse";
 import {Facility} from "../../../shared/models/Facility";
 import {PiPagination} from "../../../shared/components/pi-pagination";
+import {HttpProvider} from "../../../store/http-provider";
+import {BaseService} from "../../../shared/base.service";
+import {finalize} from "rxjs";
+import {UserPermissions} from "./user-permissions";
+import {PiLoader} from "../../../shared/components/pi-loader";
 
 export default function UserRoles() {
     const url = environment.apiUrl;
@@ -31,6 +36,8 @@ export default function UserRoles() {
     }
     const [openDialog, setOpenDialog] = useState(messageDialog);
     const [openModal, setOpenModal] = useState<boolean>(false);
+    const [openPermissionsModal, setOpenPermissionsModal] = useState<boolean>(false);
+    const [selectedRole, setSelectedRole] = useState<Role>({concurrencyStamp: "", id: "", name: "", normalizedName: ""})
     const defaultForm: FormItem[] = [
         {
             id: 'name',
@@ -42,6 +49,7 @@ export default function UserRoles() {
     ];
     const [forms, setForm] = useState<FormItem[]>(defaultForm);
     const [formId, setFormId] = useState<string>('');
+    const [allSelected, setAllSelected] = useState<any[]>([]);
     const [paging, setPaging] = useState<Paging>({
         pageSize: 10,
         pageNumber: 1,
@@ -57,6 +65,13 @@ export default function UserRoles() {
         setEditState(false);
         setOpenModal(false);
         clearDefaultForm();
+    }
+    const openPermissionsModalHandler = (data: any) => {
+        setSelectedRole(data);
+        setOpenPermissionsModal(true);
+    }
+    const closePermissionsModalHandler = () => {
+        setOpenPermissionsModal(false);
     }
     const openMessageHandler = (options: MessageProps) => {
         setOpenDialog((prevState) => {
@@ -147,29 +162,52 @@ export default function UserRoles() {
     const editHandler = (form: any) => {
         form["id"] = formId;
         setLoading(true);
-        fetch(`${url}User/EditRole`, {
-            method: 'PUT',
-            body: JSON.stringify(form),
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth?.accessToken?.token}`
-            }
-        }).then((response) => {
-            response.json().then((result: ApiResponse<any>) => {
-                if (result.status === 100) {
-                    getDataHandler();
-                    closeModalHandler();
-                    openMessageHandler({type: "success", message: result.message, open: true});
-                } else {
-                    openMessageHandler({type: "error", message: result.message, open: true});
+        HttpProvider.put<ApiResponse<any>>(
+            'User/EditRole',
+            JSON.stringify(form),
+            BaseService.HttpHeaders())
+            .pipe(finalize(() => setLoading(false)))
+            .subscribe({
+                next: result => {
+                    if (result.status === 100) {
+                        getDataHandler();
+                        closeModalHandler();
+                        openMessageHandler({type: "success", message: result.message, open: true});
+                    } else {
+                        openMessageHandler({type: "error", message: result.message, open: true});
+                    }
+                },
+                error: err => {
+                    openMessageHandler({type: "error", message: 'something went wrong please try again', open: true});
                 }
-            }).finally(() => {
-                setLoading(false);
-            });
+            })
+    }
 
-        }).catch((reason) => {
-            openMessageHandler({type: "error", message: 'something went wrong please try again', open: true});
+    const savePermissions = () => {
+        setLoading(true);
+        allSelected.forEach(u => {
+            u.roleId = selectedRole.id;
+            u.children = u.children.filter((m: any) => m.checked === true);
         });
+
+        HttpProvider.post<ApiResponse<any>>(
+            'General/RolePermissions',
+            JSON.stringify(allSelected),
+            BaseService.HttpHeaders())
+            .pipe(finalize(() => setLoading(false)))
+            .subscribe({
+                next: (result) => {
+                    if (result.status === 100) {
+                        closePermissionsModalHandler();
+                        openMessageHandler({type: "success", message: result.message, open: true});
+                    } else {
+                        openMessageHandler({type: "error", message: result.message, open: true});
+                    }
+                },
+                error: err => {
+                    openMessageHandler({type: "error", message: 'something went wrong please try again', open: true});
+                }
+            })
     }
 
     useEffect(() => {
@@ -200,6 +238,28 @@ export default function UserRoles() {
                 openModal &&
                 <PiModal fullScreen={false} onClose={closeModalHandler}>
                     <FormBuilder title={'Roles'} loading={loading} form={forms} onFormSubmit={submitHandler}/>
+                </PiModal>
+            }
+            {
+                openPermissionsModal &&
+                <PiModal fullScreen={true} onClose={closePermissionsModalHandler}>
+                    <div className={'h-full w-full flex flex-col'}>
+                        <div className={'h-auto w-full flex justify-between items-center'}>
+                            <h1>{selectedRole.normalizedName} PERMISSIONS</h1>
+                            <i onClick={closePermissionsModalHandler} className={'pi pi-times cursor-pointer'}></i>
+                        </div>
+                        <div className={'h-auto w-full flex justify-between items-center py-4'}>
+                            <PiButton onClick={savePermissions} type={'primary'} size={'small'} rounded={'rounded'}>
+                                Save Permissions
+                            </PiButton>
+                        </div>
+                        <div className={'grow w-full h-full p-2'}>
+                           <UserPermissions data={selectedRole} onPermissionsChange={(e) => {
+                               setAllSelected(e);
+                           }}/>
+                        </div>
+                    </div>
+                    <PiLoader loading={loading}/>
                 </PiModal>
             }
             <div className={'flex flex-col w-full h-full space-y-4 p-2'}>
@@ -248,7 +308,10 @@ export default function UserRoles() {
                                         <tr key={role.id}>
                                             <td className={'border-slate-700 border p-1'}>{role.name}</td>
                                             <td className={'border-slate-700 border p-1'}>
-                                                <PiButton rounded={'rounded'} size={'extra small'} type={'success'} onClick={() => editRole(role)}>EDIT</PiButton>
+                                               <div className={'flex space-x-2'}>
+                                                   <PiButton rounded={'rounded'} size={'extra small'} type={'success'} onClick={() => editRole(role)}>EDIT</PiButton>
+                                                   <PiButton rounded={'rounded'} size={'extra small'} type={'primary'} onClick={() => openPermissionsModalHandler(role)}>PERMISSIONS</PiButton>
+                                               </div>
                                             </td>
                                         </tr>
                                     )

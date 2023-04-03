@@ -1,6 +1,13 @@
+import {LoginResponseModel} from "./models/LoginResponseModel";
+import {Subject} from "rxjs";
+import {Msg} from "./models/message-type";
 
 export class BaseService {
    static key = 'static-2894trgkhh-telemedit-9762mobi';
+
+   static Menu = new Subject<any[]>();
+
+   static currentMessage = new Subject<Msg>();
 
     static setSessionData = (data: any) => {
         localStorage.setItem(this.key, JSON.stringify(data));
@@ -36,6 +43,24 @@ export class BaseService {
             var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r && 0x3 || 0x8);
             return v.toString(16);
         });
+    }
+
+    static HttpHeaders = () => {
+        let accessObj: LoginResponseModel = JSON.parse(localStorage.getItem(BaseService.key) as string) as LoginResponseModel;
+        return {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessObj?.accessToken?.token}`
+        }
+    }
+
+    static countFormatter = (count: any) => {
+        if (count > 999 && count < 1000000){
+            return (Math.abs(count / 1000)).toFixed(1) + 'K'; // convert to K for number from > 1000 < 1 million
+        }else if (count > 1000000){
+            return (Math.abs(count / 1000000)).toFixed(1) + 'M'; // convert to M for number from > 1 million
+        }else if (count < 900){
+            return count; // if value < 1000, nothing to do
+        }
     }
 }
 export const uuid = () => {

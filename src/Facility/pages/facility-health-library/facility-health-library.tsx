@@ -324,12 +324,14 @@ export default function FacilityHealthLibrary() {
                                             rounded={'rounded'}
                                             invalid={inValidTitle}
                                             required={true}
+                                            size={"normal"}
                                             onChange={titleInputOnChange}/>
                                         <PiInput
                                             value={form.subTitle as string}
                                             label={'Sub Title'}
                                             id={'subtitle'}
                                             rounded={'rounded'}
+                                            size={"normal"}
                                             onChange={subTitleInputOnChange}/>
                                         <PiSelectList
                                             rounded={'rounded'}

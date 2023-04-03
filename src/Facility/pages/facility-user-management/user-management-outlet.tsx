@@ -1,11 +1,50 @@
 import {Outlet, useNavigate} from "react-router-dom";
+import {useContext, useEffect, useState} from "react";
+import {AuthContext} from "../../../store/auth-provider";
+import {ContextInterface} from "../../../shared/models/context-interface";
 
 export default function UserManagementOutlet() {
     const navigate = useNavigate();
+    const context = useContext(AuthContext);
+    const getDefault: ContextInterface = {
+        canLogout: () => {},
+        canLogin: () => {},
+        allowedRoutes: [],
+        isAuthenticated: false };
+    const [auth, setAuth] = useState<ContextInterface>(getDefault);
+    const [menu, setMenu] = useState<Array<any>>([])
+
+    const checkRoute = (url: string) :boolean => {
+        const getPath = menu.filter((x: any) => x.path === url);
+        return getPath.length > 0;
+    }
 
     const route = (url: string) => {
-        navigate(url);
+        if (auth.user?.role?.normalizedName !== 'SYSTEM ADMINISTRATOR') {
+            if (url) {
+                const getPath = menu.filter((x: any) => x.path === url);
+                if (getPath.length > 0) {
+                    navigate(url);
+                }
+            }
+        } else {
+            navigate(url);
+        }
     }
+
+    useEffect(() => {
+        setAuth((prevState) => {
+            return {...prevState, user: context.user, accessToken: context.accessToken, allowedRoutes: context.allowedRoutes }
+        });
+    }, [context]);
+
+    useEffect(() => {
+        if ((auth.allowedRoutes as any[]).length > 0) {
+            const routes = (auth.allowedRoutes as any[]).find(u => u.title.toUpperCase() === 'USER MANAGEMENT');
+            setMenu([...routes.children]);
+        }
+    }, [auth.allowedRoutes]);
+
     return (
         <>
             <div className="flex flex-col w-full h-full">
@@ -15,12 +54,30 @@ export default function UserManagementOutlet() {
                             <Outlet/>
                         </div>
                         <div className={'flex-none w-[300px] space-y-2 p-2 border-l-gray-200 border-l dark:border-l-gray-800 overflow-auto'}>
-                            <div onClick={() => route('/facility/roles')} className={'flex space-x-2 items-center text-base dark:hover:bg-gray-800 px-2 py-1 rounded-lg cursor-pointer'}>
-                                <span className={'cursor-pointer'}>Roles</span>
-                            </div>
-                            <div onClick={() => route('/facility/users')} className={'flex space-x-2 items-center text-base dark:hover:bg-gray-800 px-2 py-1 rounded-lg cursor-pointer'}>
-                                <span className={'cursor-pointer'}>Users</span>
-                            </div>
+                            {
+                                auth.user?.role?.normalizedName !== 'SYSTEM ADMINISTRATOR' &&
+                                menu.map((item) =>
+                                    <div key={item.id}>
+                                        {
+                                            checkRoute(item.path) &&
+                                            <div onClick={() => route(item.path)} className={'flex space-x-2 items-center text-base dark:hover:bg-gray-800 px-2 py-1 rounded-lg cursor-pointer'}>
+                                                <span className={'cursor-pointer'}>{item.title}</span>
+                                            </div>
+                                        }
+                                    </div>
+                                )
+                            }
+                            {
+                                auth.user?.role?.normalizedName === 'SYSTEM ADMINISTRATOR' &&
+                                <>
+                                    <div onClick={() => route('/facility/roles')} className={'flex space-x-2 items-center text-base dark:hover:bg-gray-800 px-2 py-1 rounded-lg cursor-pointer'}>
+                                        <span className={'cursor-pointer'}>Roles</span>
+                                    </div>
+                                    <div onClick={() => route('/facility/users')} className={'flex space-x-2 items-center text-base dark:hover:bg-gray-800 px-2 py-1 rounded-lg cursor-pointer'}>
+                                        <span className={'cursor-pointer'}>Users</span>
+                                    </div>
+                                </>
+                            }
                         </div>
                     </div>
                 </div>

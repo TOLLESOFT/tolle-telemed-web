@@ -5,9 +5,11 @@ import {ContextInterface} from "../../../shared/models/context-interface";
 import {ApiResponse} from "../../../shared/models/ApiResponse";
 import {PiAvatar, PiButton} from "toll-ui-react";
 import {format} from "date-fns";
+import {useNavigate} from "react-router-dom";
 
 export default function FacilityAppointmentPending() {
     const url = environment.apiUrl;
+    const navigate = useNavigate();
     const context = useContext(AuthContext);
     const getDefault: ContextInterface = {
         canLogout: () => {},
@@ -36,6 +38,9 @@ export default function FacilityAppointmentPending() {
         });
     }
 
+    const route = (url: string) => {
+        navigate(url);
+    }
 
     useEffect(() => {
         setAuth((prevState) => {
@@ -82,10 +87,10 @@ export default function FacilityAppointmentPending() {
                                             <td className={'border-slate-700 border p-1'}>
                                                 <PiAvatar image={appointment.patient?.image}/>
                                             </td>
-                                            <td className={'border-slate-700 border p-1'}>{appointment.patient?.firstName} {appointment.patient?.lastName}</td>
-                                            <td className={'border-slate-700 border p-1'}>{format(new Date(appointment.startTime), 'hh:mm a')}</td>
+                                            <td className={'border-slate-700 border p-1 text-center'}>{appointment.patient?.firstName} {appointment.patient?.lastName}</td>
+                                            <td className={'border-slate-700 border p-1 text-center'}>{format(new Date(appointment.startTime), 'MMMM dd, yyyy hh:mm a')}</td>
                                             <td className={'border-slate-700 border p-1'}>
-                                                <PiButton rounded={'rounded'} size={'extra small'} type={'success'} onClick={() => {}}>START CONSULTATION</PiButton>
+                                                <PiButton rounded={'rounded'} size={'extra small'} type={'success'} onClick={() => route(`/facility/consulting-room/${appointment.id}`)}>START CONSULTATION</PiButton>
                                             </td>
                                         </tr>
                                     )
