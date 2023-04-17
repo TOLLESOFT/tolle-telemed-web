@@ -3,7 +3,7 @@ import {useContext, useEffect, useState} from "react";
 import {AuthContext} from "../../../store/auth-provider";
 import {ContextInterface} from "../../../shared/models/context-interface";
 
-export default function HealthLibraryOutlet() {
+export default function FacilityHomecareOutlet() {
     const navigate = useNavigate();
     const context = useContext(AuthContext);
     const getDefault: ContextInterface = {
@@ -70,11 +70,14 @@ export default function HealthLibraryOutlet() {
                             {
                                 auth.user?.role?.normalizedName === 'SYSTEM ADMINISTRATOR' &&
                                 <>
-                                    <div onClick={() => route('/facility/health-topics')} className={'flex space-x-2 items-center text-base dark:hover:bg-gray-800 px-2 py-1 rounded-lg cursor-pointer'}>
-                                        <span className={'cursor-pointer'}>Topics</span>
+                                    <div onClick={() => route('/home-care/communities')} className={'flex space-x-2 items-center text-base dark:hover:bg-gray-800 px-2 py-1 rounded-lg cursor-pointer'}>
+                                        <span className={'cursor-pointer'}>Communities</span>
                                     </div>
-                                    <div onClick={() => route('/facility/health-library')} className={'flex space-x-2 items-center text-base dark:hover:bg-gray-800 px-2 py-1 rounded-lg cursor-pointer'}>
-                                        <span className={'cursor-pointer'}>Library</span>
+                                    <div onClick={() => route('/home-care/PolyKiosks')} className={'flex space-x-2 items-center text-base dark:hover:bg-gray-800 px-2 py-1 rounded-lg cursor-pointer'}>
+                                        <span className={'cursor-pointer'}>Poly Kiosks</span>
+                                    </div>
+                                    <div onClick={() => route('/home-care/activities')} className={'flex space-x-2 items-center text-base dark:hover:bg-gray-800 px-2 py-1 rounded-lg cursor-pointer'}>
+                                        <span className={'cursor-pointer'}>Activities</span>
                                     </div>
                                 </>
                             }

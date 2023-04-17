@@ -4,6 +4,7 @@ import {Link, useNavigate} from "react-router-dom";
 import {BaseService} from "../base.service";
 import {LoginResponseModel} from "../models/LoginResponseModel";
 import {PiAvatar, PiButton, PiIconButton} from "toll-ui-react";
+import userProfile from '../../assets/user.png'
 
 export const FacilityLayoutBody = (props: any) => {
     const context = useContext(AuthContext);
@@ -51,9 +52,9 @@ export const FacilityLayoutBody = (props: any) => {
                                             </div>
                                         </div>
                                     }
-                                    <Link className="h-full flex flex-wrap content-center" to={'/account/profile'}>
+                                    <Link className="h-full flex flex-wrap content-center" to={'/facility/user/profile'}>
                                         <div className={'flex items-center space-x-2'}>
-                                            <PiAvatar image={context?.user?.image}/>
+                                            <PiAvatar image={context?.user?.image ?? userProfile}/>
                                             <span className={'text-base font-bold uppercase leading-3 cursor-pointer text-gray-600 dark:text-white'}>
                                                 {
                                                     context.user?.role?.normalizedName !== 'SYSTEM ADMINISTRATOR' &&

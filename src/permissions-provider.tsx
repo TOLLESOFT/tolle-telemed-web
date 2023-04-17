@@ -33,6 +33,10 @@ import FacilityScheduleConfiguration from "./Facility/pages/facility-schedule-co
 import ModulesSetup from "./Facility/pages/modules-setup";
 import React from "react";
 import DoctorConsultation, { loader as doctorConsultationLoader } from "./Facility/pages/facility-appointments/doctor-consultation";
+import FacilityUserProfile from "./Facility/pages/facility-user-profile";
+import FacilityPatients from "./Facility/pages/facility-patients";
+import FacilityHomecareOutlet from "./Facility/pages/facility-homecare/facility-homecare-outlet";
+import CommunitiesSetup from "./Facility/pages/facility-homecare/communities-setup";
 
 export default function PermissionsProvider() {
 
@@ -149,6 +153,18 @@ export default function PermissionsProvider() {
                             element: <Users />
                         }
                     ]
+                },{
+                    element: <FacilityHomecareOutlet/>,
+                    children: [
+                        {
+                            path: 'home-care/communities',
+                            element: <CommunitiesSetup />
+                        },
+                        {
+                            path: 'home-care/activities',
+                            element: <Users />
+                        }
+                    ]
                 },
                 {
                     path: 'facility/setup',
@@ -169,6 +185,14 @@ export default function PermissionsProvider() {
                 {
                     path: 'facility/modules',
                     element: <ModulesSetup />
+                },
+                {
+                    path: 'facility/user/profile',
+                    element: <FacilityUserProfile/>
+                },
+                {
+                    path: 'facility/patients',
+                    element: <FacilityPatients/>
                 }
             ]
         },
