@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useState} from "react";
-import {PiButton, PiImagePicker, PiInput, PiSelectList, PiTextArea} from "toll-ui-react";
+import {PiButton, PiCheckbox, PiImagePicker, PiInput, PiSelectList, PiTextArea} from "toll-ui-react";
 import {FormObject} from "./form-object";
 import {FormDate} from "./form-date";
 import {isValid} from "date-fns";
@@ -209,6 +209,15 @@ export const Builder = (props: Props) => {
                           invalid={formItem.props.invalid}
                           required={formItem.props.required}
                           onValueChange={(e) => {formOnChange(e, formItem.type, index)}}/>
+                  }
+                  {
+                    formItem.type === 'checkbox' &&
+                      <PiCheckbox
+                          label={formItem.props.label}
+                          position={"right"}
+                          value={(formItem.props as FormCheckBox).value}
+                          onChange={(e) => {formOnChange(e, formItem.type, index)}}
+                      />
                   }
                 </div>
             )

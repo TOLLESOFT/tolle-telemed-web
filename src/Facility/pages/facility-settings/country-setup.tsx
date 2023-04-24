@@ -1,7 +1,7 @@
-import {PiAvatar, PiButton, PiMessage, PiModal, PiSkeleton, PiSkeletonWrapper} from "toll-ui-react";
+import {PiAvatar, PiButton, PiMessage, PiModal} from "toll-ui-react";
 import {environment} from "../../../shared/environment";
 import {AuthContext} from "../../../store/auth-provider";
-import {useContext, useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {ContextInterface} from "../../../shared/models/context-interface";
 import {Country} from "../../../shared/models/country";
 import {MessageProps} from "toll-ui-react/lib/components/pi-message";
@@ -11,6 +11,8 @@ import {ApiResponse} from "../../../shared/models/ApiResponse";
 import {Paging} from "../../../shared/models/paging";
 import {Filter} from "../../../shared/models/filter";
 import {PagedResponse} from "../../../shared/models/PagedResponse";
+import {RegionSetup} from "./region-setup";
+import {HttpProvider} from "../../../store/http-provider";
 
 export default function CountrySetup() {
     const url = environment.apiUrl;
@@ -24,6 +26,7 @@ export default function CountrySetup() {
     const [auth, setAuth] = useState<ContextInterface>(getDefault);
 
     const [openModal, setOpenModal] = useState<boolean>(false);
+    const [openRegionModal, setOpenRegionModal] = useState<boolean>(false);
 
     const [countries, setCountries] = useState<Country[]>([]);
 
@@ -34,6 +37,8 @@ export default function CountrySetup() {
     const [paging, setPaging] = useState<Paging>({ pageSize: 10, pageNumber: 1, totalPages: 0, totalRecords: 0, currentSize: 0 });
 
     const [filter, setFilter] = useState<Filter>({});
+
+    const [selectedCountry, setSelectedCountry] = useState<any>(null);
 
     const defaultForm: FormItem[] = [
         {
@@ -234,6 +239,7 @@ export default function CountrySetup() {
     // update auth value
     useEffect(() => {
         if (auth.accessToken?.token) {
+            HttpProvider.apiUrl = environment.apiUrl;
             getCountriesHandler();
         }
     }, [auth]);
@@ -248,6 +254,19 @@ export default function CountrySetup() {
                 <PiModal fullScreen={false} onClose={closeModalHandler}>
                     <h1>New Country</h1>
                     <FormBuilder loading={loading} form={forms} onFormSubmit={submitHandler}/>
+                </PiModal>
+            }
+            {
+                openRegionModal &&
+                <PiModal fullScreen={true} onClose={() => {
+                    setOpenRegionModal(false)
+                }}>
+                    <div className={'h-auto w-full flex justify-end items-center'}>
+                        <i onClick={() => {
+                            setOpenRegionModal(false)
+                        }} className={'pi pi-times cursor-pointer'}></i>
+                    </div>
+                    <RegionSetup auth={auth} country={selectedCountry}/>
                 </PiModal>
             }
             <div className={'flex flex-col w-full h-full space-y-4'}>
@@ -265,6 +284,7 @@ export default function CountrySetup() {
                             <th className={'border border-slate-600'}>LANGUAGE</th>
                             <th className={'border border-slate-600'}>CURRENCY</th>
                             <th className={'border border-slate-600'}>CURRENCY SYMBOL</th>
+                            <th className={'border border-slate-600'}></th>
                         </tr>
                         </thead>
                         <tbody>
@@ -289,6 +309,19 @@ export default function CountrySetup() {
                                             <td className={'border-slate-700 border p-1'}> {country.mainLanguage}</td>
                                             <td className={'border-slate-700 border p-1'}> {country.currencyName}</td>
                                             <td className={'border-slate-700 border p-1'}> {country.currencySymbol}</td>
+                                            <td className={'border-slate-700 border p-1'}>
+                                                <div className={'flex space-x-2'}>
+                                                    <PiButton onClick={() => editCountry(country)} type={'primary'} size={'small'} rounded={'rounded'}>
+                                                        Edit Country
+                                                    </PiButton>
+                                                    <PiButton onClick={() => {
+                                                        setSelectedCountry(country);
+                                                        setOpenRegionModal(true);
+                                                    }} type={'primary'} size={'small'} rounded={'rounded'}>
+                                                        Regions
+                                                    </PiButton>
+                                                </div>
+                                            </td>
                                         </tr>
                                     )
                                 }

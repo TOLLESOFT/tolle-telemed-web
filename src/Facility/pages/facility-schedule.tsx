@@ -51,7 +51,7 @@ export default function FacilitySchedule() {
                 required: true,
                 label: 'Start Date',
                 disablePastDates: true
-            } as FormDate
+            }
         },
         {
             id: 'endDate',
@@ -61,7 +61,7 @@ export default function FacilitySchedule() {
                 required: true,
                 label: 'End Date',
                 disablePastDates: true
-            } as FormDate
+            }
         },
         {
             id: 'scheduleType',
@@ -70,7 +70,7 @@ export default function FacilitySchedule() {
                 required: true,
                 data: scheduleTypes,
                 label: 'Schedule Types'
-            } as FormSelect
+            }
         }
     ]
     const [forms, setForm] = useState<FormObject[]>(scheduleForm);

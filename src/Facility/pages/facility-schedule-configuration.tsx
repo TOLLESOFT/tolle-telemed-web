@@ -195,7 +195,6 @@ export default function FacilityScheduleConfiguration() {
             }
         });
 
-        console.log(durationWaitingTimeForm, data);
         setDurationWaitingTimeForm([...durationWaitingTimeForm]);
     }
 
