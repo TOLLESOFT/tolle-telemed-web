@@ -37,6 +37,10 @@ import FacilityUserProfile from "./Facility/pages/facility-user-profile";
 import FacilityPatients from "./Facility/pages/facility-patients";
 import FacilityHomecareOutlet from "./Facility/pages/facility-homecare/facility-homecare-outlet";
 import CommunitiesSetup from "./Facility/pages/facility-homecare/communities-setup";
+import PolyKioskSetup from "./Facility/pages/facility-homecare/poly-kiosk-setup";
+import ActivitiesSetup from "./Facility/pages/facility-homecare/activities-setup";
+import ErrorPage from "./error-page";
+import TeamsSetup from "./Facility/pages/facility-homecare/teams-setup";
 
 export default function PermissionsProvider() {
 
@@ -44,6 +48,7 @@ export default function PermissionsProvider() {
         {
             path: '/',
             element: <AuthLayout/>,
+            errorElement: <ErrorPage/>,
             children: [
                 {
                     path: '/',
@@ -57,6 +62,7 @@ export default function PermissionsProvider() {
         },
         {
             element: <FacilityLayout/>,
+            errorElement: <ErrorPage/>,
             children: [
                 {
                     path: 'facility/dashboard',
@@ -132,11 +138,11 @@ export default function PermissionsProvider() {
                     element: <HealthLibraryOutlet/>,
                     children: [
                         {
-                            path: 'facility/health-library',
+                            path: 'facility/health/library',
                             element: <FacilityHealthLibrary />
                         },
                         {
-                            path: 'facility/health-topics',
+                            path: 'facility/health/topics',
                             element: <HealthLibraryTopics />
                         }
                     ]
@@ -145,11 +151,11 @@ export default function PermissionsProvider() {
                     element: <UserManagementOutlet/>,
                     children: [
                         {
-                            path: 'facility/roles',
+                            path: 'facility/user-management/roles',
                             element: <UserRoles />
                         },
                         {
-                            path: 'facility/users',
+                            path: 'facility/user-management/users',
                             element: <Users />
                         }
                     ]
@@ -161,8 +167,16 @@ export default function PermissionsProvider() {
                             element: <CommunitiesSetup />
                         },
                         {
+                            path: 'home-care/poly-kiosks',
+                            element: <PolyKioskSetup/>
+                        },
+                        {
                             path: 'home-care/activities',
-                            element: <Users />
+                            element: <ActivitiesSetup/>
+                        },
+                        {
+                            path: 'home-care/teams',
+                            element: <TeamsSetup/>
                         }
                     ]
                 },
@@ -199,7 +213,8 @@ export default function PermissionsProvider() {
         {
             element: <DoctorConsultation/>,
             path: '/facility/consulting-room/:id',
-            loader: doctorConsultationLoader
+            loader: doctorConsultationLoader,
+            errorElement: <ErrorPage/>,
         }
     ]);
     return (

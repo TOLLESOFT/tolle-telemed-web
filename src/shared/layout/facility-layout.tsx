@@ -98,7 +98,7 @@ export function FacilityLayout() {
                 <div className="flex justify-center w-full h-full">
                     <div className="max-xl:w-full xl:w-full gap-4">
                         <div className="flex w-full h-full overflow-auto">
-                            <div className={'flex-none w-[300px] bg-gray-200 dark:bg-gray-800 border-r dark:border-r-gray-800 p-2'}>
+                            <div className={'flex-none w-[300px] bg-gray-300 dark:bg-gray-800 border-r dark:border-r-gray-800 p-2'}>
                                 <div className={'flex flex-col w-full h-full'}>
                                     <div className={'grow w-full h-full'}>
                                         {
@@ -107,7 +107,7 @@ export function FacilityLayout() {
                                                 <div key={item.id}>
                                                     {
                                                         checkRoute(item.path) &&
-                                                        <div onClick={() => route(item.path, item.title)} className={'flex space-x-2 items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer'}>
+                                                        <div onClick={() => route(item.path, item.title)} className={`flex space-x-2 items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer`}>
                                                             <i className={`${item.icon} text-base cursor-pointer`}></i>
                                                             <span className={'cursor-pointer'}>{item.title}</span>
                                                         </div>
@@ -118,51 +118,51 @@ export function FacilityLayout() {
                                         {
                                             auth.user?.role?.normalizedName === 'SYSTEM ADMINISTRATOR' &&
                                             <>
-                                                <div onClick={() => route('/facility/dashboard')} className={'flex space-x-2 items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer'}>
+                                                <div onClick={() => route('/facility/dashboard')} className={`flex space-x-2 ${window.location.pathname.includes('/dashboard') && 'bg-blue-400'} items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer`}>
                                                     <i className={'pi pi-calendar text-base cursor-pointer'}></i>
                                                     <span className={'cursor-pointer'}>Dashboard</span>
                                                 </div>
-                                                <div onClick={() => route('/facility/appointments/pending')} className={'flex space-x-2 items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer'}>
+                                                <div onClick={() => route('/facility/appointments/pending')} className={`flex space-x-2 ${window.location.pathname.includes('/appointments') && 'bg-blue-400'} items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer`}>
                                                     <i className={'pi pi-calendar text-base cursor-pointer'}></i>
                                                     <span className={'cursor-pointer'}>Appointments</span>
                                                 </div>
-                                                <div onClick={() => route('/facility/my-schedule')} className={'flex space-x-2 items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer'}>
+                                                <div onClick={() => route('/facility/my-schedule')} className={`flex space-x-2 ${window.location.pathname.includes('/my-schedule') && 'bg-blue-400'} items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer`}>
                                                     <i className={'pi pi-calendar-plus text-base cursor-pointer'}></i>
                                                     <span className={'cursor-pointer'}>My Schedule</span>
                                                 </div>
-                                                <div onClick={() => route('facility/roles')} className={'flex space-x-2 items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer'}>
+                                                <div onClick={() => route('facility/user-management/roles')} className={`flex space-x-2 ${window.location.pathname.includes('/user-management') && 'bg-blue-400'} items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer`}>
                                                     <i className={'pi pi-users text-base cursor-pointer'}></i>
                                                     <span className={'cursor-pointer'}>User Management</span>
                                                 </div>
-                                                <div onClick={() => route('home-care/communities')} className={'flex space-x-2 items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer'}>
+                                                <div onClick={() => route('home-care/communities')} className={`flex space-x-2 ${window.location.pathname.includes('/home-care') && 'bg-blue-400'} items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer`}>
                                                     <i className={'pi pi-home text-base cursor-pointer'}></i>
                                                     <span className={'cursor-pointer'}>Home Care Management</span>
                                                 </div>
-                                                <div onClick={() => route('facility/patients')} className={'flex space-x-2 items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer'}>
+                                                <div onClick={() => route('facility/patients')} className={`flex space-x-2 ${window.location.pathname.includes('/patients') && 'bg-blue-400'} items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer`}>
                                                     <i className={'pi pi-user text-base cursor-pointer'}></i>
                                                     <span className={'cursor-pointer'}>Patient Management</span>
                                                 </div>
-                                                <div onClick={() => route('facility/health-library')} className={'flex space-x-2 items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer'}>
+                                                <div onClick={() => route('facility/health/library')} className={`flex space-x-2 ${window.location.pathname.includes('/health') && 'bg-blue-400'} items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer`}>
                                                     <i className={'pi pi-book text-base cursor-pointer'}></i>
                                                     <span className={'cursor-pointer'}>Health Library</span>
                                                 </div>
-                                                <div onClick={() => route('/facility/settings/country')} className={'flex space-x-2 items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer'}>
+                                                <div onClick={() => route('/facility/settings/country')} className={`flex space-x-2 ${window.location.pathname.includes('/settings') && 'bg-blue-400'} items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer`}>
                                                     <i className={'pi pi-cog text-base cursor-pointer'}></i>
                                                     <span className={'cursor-pointer'}>Settings</span>
                                                 </div>
-                                                <div onClick={() => route('/facility/schedule-configuration')} className={'flex space-x-2 items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer'}>
+                                                <div onClick={() => route('/facility/schedule-configuration')} className={`flex space-x-2 ${window.location.pathname === '/facility/schedule-configuration' && 'bg-blue-400'} items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer`}>
                                                     <i className={'pi pi-sliders-h text-base cursor-pointer'}></i>
                                                     <span className={'cursor-pointer'}>Schedule Configuration</span>
                                                 </div>
-                                                <div onClick={() => route('/facility/setup')} className={'flex space-x-2 items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer'}>
+                                                <div onClick={() => route('/facility/setup')} className={`flex space-x-2 ${window.location.pathname === '/facility/setup' && 'bg-blue-400'} items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer`}>
                                                     <i className={'pi pi-building text-base cursor-pointer'}></i>
                                                     <span className={'cursor-pointer'}>Facility Setup</span>
                                                 </div>
-                                                <div onClick={() => route('facility/pricing')} className={'flex space-x-2 items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer'}>
+                                                <div onClick={() => route('facility/pricing')} className={`flex space-x-2 ${window.location.pathname === '/facility/pricing' && 'bg-blue-400'} items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer`}>
                                                     <i className={'pi pi-money-bill text-base cursor-pointer'}></i>
                                                     <span className={'cursor-pointer'}>Pricing Setup</span>
                                                 </div>
-                                                <div onClick={() => route('facility/modules')} className={'flex space-x-2 items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer'}>
+                                                <div onClick={() => route('facility/modules')} className={`flex space-x-2 ${window.location.pathname === '/facility/modules' && 'bg-blue-400'} items-center text-base dark:hover:text-slate-400 py-3 px-4 rounded-xl cursor-pointer`}>
                                                     <i className={'pi pi-lock text-base cursor-pointer'}></i>
                                                     <span className={'cursor-pointer'}>Modules Setup</span>
                                                 </div>

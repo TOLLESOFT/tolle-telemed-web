@@ -5,5 +5,4 @@ export interface LoginResponseModel{
     accessToken?: TokenModel,
     user?: User;
     permissions: any []
-    
 }

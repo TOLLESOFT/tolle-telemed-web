@@ -85,7 +85,7 @@ export default function FacilityPatients() {
             props: {
                 label: 'Gender',
                 required: true,
-                type: 'text',
+                type: 'single',
                 data: gender
             } as FormSelect
         },
@@ -168,7 +168,7 @@ export default function FacilityPatients() {
             props: {
                 label: 'Community',
                 required: true,
-                type: 'text',
+                type: 'single',
                 data: communities
             } as FormSelect
         },
@@ -178,7 +178,7 @@ export default function FacilityPatients() {
             props: {
                 label: 'Poly Kiosk',
                 required: true,
-                type: 'text',
+                type: 'single',
                 data: polyKiosks
             } as FormSelect
         },
@@ -188,7 +188,7 @@ export default function FacilityPatients() {
             props: {
                 label: 'Activity',
                 required: true,
-                type: 'text',
+                type: 'single',
                 data: activities
             } as FormSelect
         }

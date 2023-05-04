@@ -3,22 +3,23 @@ import {useContext, useEffect, useState} from "react";
 import {AuthContext} from "../../../store/auth-provider";
 import {ContextInterface} from "../../../shared/models/context-interface";
 import {MessageProps} from "toll-ui-react/lib/components/pi-message";
+import {Paging} from "../../../shared/models/paging";
 import {FormObject} from "../../../shared/FormBuilder/form-object";
-import {FormSelect} from "../../../shared/FormBuilder/form-select";
 import {HttpProvider} from "../../../store/http-provider";
 import {ApiResponse} from "../../../shared/models/ApiResponse";
 import {finalize} from "rxjs";
-import {PiButton, PiMessage, PiModal, PiSelectList} from "toll-ui-react";
-import {PiPagination} from "../../../shared/components/pi-pagination";
-import {Builder} from "../../../shared/FormBuilder/builder";
 import {FormInput} from "../../../shared/FormBuilder/form-input";
 import {FormTextArea} from "../../../shared/FormBuilder/form-text-area";
+import {FormSelect} from "../../../shared/FormBuilder/form-select";
 import {FormImage} from "../../../shared/FormBuilder/form-image";
 import {FormDate} from "../../../shared/FormBuilder/form-date";
 import {FormCheckBox} from "../../../shared/FormBuilder/form-check-box";
-import {Paging} from "../../../shared/models/paging";
+import {PiButton, PiMessage, PiModal, PiSelectList} from "toll-ui-react";
+import {Builder} from "../../../shared/FormBuilder/builder";
+import {PiPagination} from "../../../shared/components/pi-pagination";
 
-export  default function CommunitiesSetup() {
+export default function PolyKioskSetup(){
+    const url = environment.apiUrl;
     const context = useContext(AuthContext);
     const getDefault: ContextInterface = {
         canLogout: () => {},
@@ -41,7 +42,7 @@ export  default function CommunitiesSetup() {
     const [formId, setFormId] = useState<string>('');
     const [paging, setPaging] = useState<Paging>({ pageSize: 10, pageNumber: 1, totalPages: 0, totalRecords: 0, currentSize: 0 });
     const regionForm: FormObject[] = [
-     {
+        {
             id: 'regionId',
             type: "select",
             props: {
@@ -56,7 +57,7 @@ export  default function CommunitiesSetup() {
             type: "text",
             props: {
                 required: true,
-                label: 'Community Name',
+                label: 'PolyKiosk',
                 value: ''
             }
         }
@@ -76,7 +77,7 @@ export  default function CommunitiesSetup() {
 
     const getCommunities = () => {
         setLoading(true);
-        HttpProvider.get<ApiResponse<Array<any>>>(`HomeCare/GetCommunities`, {
+        HttpProvider.get<ApiResponse<Array<any>>>(`HomeCare/GetPolyKiosk`, {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${auth?.accessToken?.token}`
         }).pipe(finalize(() => setLoading(false)))
@@ -131,7 +132,7 @@ export  default function CommunitiesSetup() {
         setOpenModal(false);
     }
 
-    const editCommunitiesForm = (data: any) => {
+    const editCommunititesForm = (data: any) => {
         setEditState(true);
         setSelectedCommunity(data);
         setCountry(data.region.countryId);
@@ -159,7 +160,7 @@ export  default function CommunitiesSetup() {
 
     const saveHandler = (form: any) => {
         setLoading(true);
-        HttpProvider.post<ApiResponse<any>>('HomeCare/PostCommunities',
+        HttpProvider.post<ApiResponse<any>>('HomeCare/PostPolyKiosk',
             JSON.stringify(form), {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${auth?.accessToken?.token}`
@@ -180,7 +181,7 @@ export  default function CommunitiesSetup() {
     const editHandler = (form: any) => {
         setLoading(true);
         form.id = formId;
-        HttpProvider.put<ApiResponse<any>>('HomeCare/PutCommunities',
+        HttpProvider.put<ApiResponse<any>>('HomeCare/PutPolyKiosk',
             JSON.stringify(form), {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${auth?.accessToken?.token}`
@@ -230,10 +231,10 @@ export  default function CommunitiesSetup() {
                             }
                         }
                     });
-                    setForm([...form]);
                     setFormId(selectedCommunity.id);
                     setOpenModal(true);
                 }
+                setForm([...form]);
             }
         }
     }, [regions, selectedCommunity, editState])
@@ -271,7 +272,7 @@ export  default function CommunitiesSetup() {
             <div className={'flex flex-col w-full h-full space-y-4 p-2'}>
                 <div className={'h-auto w-full flex justify-between'}>
                     <PiButton onClick={openModalHandler} type={'primary'} size={'small'} rounded={'rounded'}>
-                        <i className={'pi pi-plus'}></i> <span className={'ml-2'}>Add Community</span>
+                        <i className={'pi pi-plus'}></i> <span className={'ml-2'}>Add Poly Kiosk</span>
                     </PiButton>
 
                     <PiPagination
@@ -315,7 +316,7 @@ export  default function CommunitiesSetup() {
                                             <td className={'border-slate-700 border p-1'}>{community.name}</td>
                                             <td className={'border-slate-700 border p-1'}>
                                                 <div className={'flex space-x-2'}>
-                                                    <PiButton rounded={'rounded'} size={'extra small'} type={'success'} onClick={() => editCommunitiesForm(community)}>EDIT</PiButton>
+                                                    <PiButton rounded={'rounded'} size={'extra small'} type={'success'} onClick={() => editCommunititesForm(community)}>EDIT</PiButton>
                                                 </div>
                                             </td>
                                         </tr>

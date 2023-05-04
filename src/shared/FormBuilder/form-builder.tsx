@@ -13,7 +13,7 @@ export  const FormBuilder = (props: Props) => {
 
     const [forms, setForm] = useState<FormItem[]>(props.form);
 
-    const onSubmitHandler = useCallback((event?: any) => {
+    const onSubmitHandler = (event?: any) => {
         if (event) {
             event.preventDefault();
         }
@@ -26,17 +26,19 @@ export  const FormBuilder = (props: Props) => {
                 }
             }
         });
-
         setForm([...forms]);
 
         if (errorCount === 0) {
-            props.onFormSubmit?.(forms.reduce((item, currentValue) => {
+            const data = forms.reduce((item, currentValue) => {
                 return { ...item, [currentValue.id]: currentValue.value };
-            }, {}));
-        }
-    }, [forms, props.form]);
+            }, {});
 
-    const formOnChange = useCallback((event: any, type: 'text' | 'textarea' | 'checkbox' | 'image'| 'date' | 'email' | 'number' | 'password' | 'list', index: number) => {
+            console.log(data);
+            props.onFormSubmit?.();
+        }
+    }
+
+    const formOnChange = (event: any, type: 'text' | 'textarea' | 'checkbox' | 'image'| 'date' | 'email' | 'number' | 'password' | 'list', index: number) => {
         if (type === 'text') {
             forms[index].value = event;
         }
@@ -57,7 +59,7 @@ export  const FormBuilder = (props: Props) => {
         }
 
         setForm([...forms]);
-    }, [forms]);
+    }
 
     const getFiles = useCallback((images: Array<any>, form: FormItem, index: number) => {
         if (images.length > 0) {

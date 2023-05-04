@@ -70,10 +70,10 @@ export default function UserManagementOutlet() {
                             {
                                 auth.user?.role?.normalizedName === 'SYSTEM ADMINISTRATOR' &&
                                 <>
-                                    <div onClick={() => route('/facility/roles')} className={'flex space-x-2 items-center text-base dark:hover:bg-gray-800 px-2 py-1 rounded-lg cursor-pointer'}>
+                                    <div onClick={() => route('/facility/user-management/roles')} className={`flex space-x-2 ${window.location.pathname === '/facility/user-management/roles' && 'bg-blue-400'} items-center text-base dark:hover:bg-gray-800 px-2 py-1 rounded-lg cursor-pointer`}>
                                         <span className={'cursor-pointer'}>Roles</span>
                                     </div>
-                                    <div onClick={() => route('/facility/users')} className={'flex space-x-2 items-center text-base dark:hover:bg-gray-800 px-2 py-1 rounded-lg cursor-pointer'}>
+                                    <div onClick={() => route('/facility/user-management/users')} className={`flex space-x-2 ${window.location.pathname === '/facility/user-management/users' && 'bg-blue-400'} items-center text-base dark:hover:bg-gray-800 px-2 py-1 rounded-lg cursor-pointer`}>
                                         <span className={'cursor-pointer'}>Users</span>
                                     </div>
                                 </>

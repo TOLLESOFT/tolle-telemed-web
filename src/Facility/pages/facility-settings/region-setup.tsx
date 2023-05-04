@@ -12,7 +12,7 @@ import {ApiResponse} from "../../../shared/models/ApiResponse";
 import {ScheduleType} from "../../../shared/models/schedule-type";
 import {finalize} from "rxjs";
 import {Builder} from "../../../shared/FormBuilder/builder";
-import {PiButton, PiCheckbox, PiLoader, PiModal} from "toll-ui-react";
+import {PiButton, PiCheckbox, PiLoader, PiMessage, PiModal} from "toll-ui-react";
 
 interface Props {
   auth: any;
@@ -178,6 +178,10 @@ export const RegionSetup = (prop: Props) => {
   return (
       <>
         <PiLoader loading={loading}/>
+        {
+            openDialog.open &&
+            <PiMessage onClose={closeMessageHandler} message={openDialog.message} type={openDialog.type}/>
+        }
         {
             openModal &&
             <PiModal fullScreen={false} onClose={closeModalHandler}>

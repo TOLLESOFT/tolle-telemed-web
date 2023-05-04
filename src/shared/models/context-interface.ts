@@ -11,4 +11,5 @@ export interface ContextInterface {
     canLogout: () => void;
     allowedRoutes?: Array<any>;
     hubConnect?: HubConnection;
+    theme?: string;
 }

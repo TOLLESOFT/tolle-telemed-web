@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useState} from "react";
-import {PiButton, PiCheckbox, PiImagePicker, PiInput, PiSelectList, PiTextArea} from "toll-ui-react";
+import {PiButton, PiCheckbox, PiImagePicker, PiInput, PiMultiSelectList, PiSelectList, PiTextArea} from "toll-ui-react";
 import {FormObject} from "./form-object";
 import {FormDate} from "./form-date";
 import {isValid} from "date-fns";
@@ -127,7 +127,10 @@ export const Builder = (props: Props) => {
     setForm([...forms]);
   }, [forms])
 
-
+  useEffect(() => {
+    console.log('ff prop', props.form);
+    setForm([...props.form])
+  }, [props.form])
   return (
       <>
         <h1>
@@ -176,17 +179,35 @@ export const Builder = (props: Props) => {
                   }
                   {
                       formItem.type === 'select' &&
-                      <PiSelectList
-                          rounded={'rounded'}
-                          label={formItem.props.label}
-                          onValueChange={(e) => selectListValueChange(e, index)}
-                          data={(formItem.props as FormSelect).data ?? []}
-                          invalid={formItem.props.invalid}
-                          required={formItem.props.required}
-                          disabled={formItem.props.disabled}
-                          value={(formItem.props as FormSelect).value}
-                          dataValue={(formItem.props as FormSelect).dataValue ?? 'id'}
-                          dataLabel={(formItem.props as FormSelect).dataName ?? 'name'}/>
+                      <>
+                        {
+                          ((formItem.props as FormSelect).type === undefined || (formItem.props as FormSelect).type === 'single') &&
+                            <PiSelectList
+                                rounded={'rounded'}
+                                label={formItem.props.label}
+                                onValueChange={(e) => selectListValueChange(e, index)}
+                                data={(formItem.props as FormSelect).data ?? []}
+                                invalid={formItem.props.invalid}
+                                required={formItem.props.required}
+                                disabled={formItem.props.disabled}
+                                value={(formItem.props as FormSelect).value}
+                                dataValue={(formItem.props as FormSelect).dataValue ?? 'id'}
+                                dataLabel={(formItem.props as FormSelect).dataName ?? 'name'}/>
+                        }
+                        {
+                            (formItem.props as FormSelect).type === 'multiple' &&
+                            <PiMultiSelectList
+                                rounded={'rounded'}
+                                label={formItem.props.label}
+                                onValueChange={(e: any) => selectListValueChange(e, index)}
+                                data={(formItem.props as FormSelect).data ?? []}
+                                invalid={formItem.props.invalid}
+                                required={formItem.props.required}
+                                value={(formItem.props as FormSelect).value}
+                                dataValue={(formItem.props as FormSelect).dataValue ?? 'id'}
+                                dataLabel={(formItem.props as FormSelect).dataName ?? 'name'}/>
+                        }
+                      </>
                   }
                   {
                       formItem.type === 'date' &&

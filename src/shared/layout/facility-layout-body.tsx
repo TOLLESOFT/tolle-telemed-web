@@ -32,7 +32,7 @@ export const FacilityLayoutBody = (props: any) => {
         <>
             <div className="h-screen w-screen dark:bg-gray-800/50 overflow-auto">
                 <div className="flex flex-col h-full w-full">
-                    <div className="h-[95px] border bg-white dark:bg-gray-800 dark:border-gray-800 w-full px-5">
+                    <div className="h-[95px] border bg-gray-300 dark:bg-gray-800 dark:border-gray-800 w-full px-5">
                         <div className="lg:block max-lg:hidden w-full h-full">
                             <div className="w-full h-full flex justify-between">
                                 <div className="h-full flex space-x-5">

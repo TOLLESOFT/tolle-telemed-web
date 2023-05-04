@@ -4,6 +4,7 @@ import {Msg} from "./models/message-type";
 
 export class BaseService {
    static key = 'static-2894trgkhh-telemedit-9762mobi';
+   static theme = 'static-theme-tele-9464mobi';
 
    static Menu = new Subject<any[]>();
 

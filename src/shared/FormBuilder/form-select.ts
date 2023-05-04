@@ -7,4 +7,5 @@ export class FormSelect {
     data?: Array<any>
     dataName?: string
     dataValue?: any
+    type?: 'single' | 'multiple'
 }

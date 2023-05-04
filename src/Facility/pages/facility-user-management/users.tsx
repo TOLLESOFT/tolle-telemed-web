@@ -16,6 +16,15 @@ import {Country} from "../../../shared/models/country";
 import {Specialty} from "../../../shared/models/specialty";
 import {UserModel} from "../../../shared/models/UserModel";
 import {Gender} from "../../../shared/models/Gender";
+import {FormObject} from "../../../shared/FormBuilder/form-object";
+import {FormSelect} from "../../../shared/FormBuilder/form-select";
+import {FormDate} from "../../../shared/FormBuilder/form-date";
+import {FormImage} from "../../../shared/FormBuilder/form-image";
+import {FormInput} from "../../../shared/FormBuilder/form-input";
+import {FormTextArea} from "../../../shared/FormBuilder/form-text-area";
+import {Builder} from "../../../shared/FormBuilder/builder";
+import {HttpProvider} from "../../../store/http-provider";
+import {finalize} from "rxjs";
 
 export  default function Users() {
     const url = environment.apiUrl;
@@ -40,100 +49,125 @@ export  default function Users() {
     const [specialties, setSpecialties] = useState<Specialty[]>([]);
     const [workPlaces, setWorkPlaces] = useState<Facility[]>([]);
     const [facilities, setFacilities] = useState<Facility[]>([]);
-    const defaultForm: FormItem[] = [
+    const defaultForm: FormObject[] = [
         {
             id: 'image',
             type: "image",
-            required: true,
-            label: 'User Photo',
-            value: ''
+            props: {
+                required: true,
+                label: 'User Photo',
+                value: ''
+            }
         },
         {
             id: 'firstName',
             type: "text",
-            required: true,
-            label: 'First Name',
-            value: ''
+            props: {
+                required: true,
+                label: 'First Name',
+                value: ''
+            }
         },
         {
             id: 'lastName',
             type: "text",
-            required: true,
-            label: 'Last Name',
-            value: ''
+            props: {
+                required: true,
+                label: 'Last Name',
+                value: ''
+            }
         },
         {
             id: 'surName',
             type: "text",
-            required: false,
-            label: 'Middle Name',
-            value: ''
+            props: {
+                required: false,
+                label: 'Middle Name',
+                value: ''
+            }
         },
         {
             id: 'genderId',
-            type: "list",
-            required: true,
-            label: 'Gender',
-            value: '',
-            list: gender
+            type: "select",
+            props: {
+                required: true,
+                label: 'Gender',
+                value: '',
+                data: gender
+            }
         },
         {
             id: 'email',
-            type: "email",
-            required: true,
-            label: 'Email',
-            value: ''
+            type: "text",
+            props: {
+                type: "email",
+                required: true,
+                label: 'Email',
+                value: ''
+            }
         },
         {
             id: 'address',
             type: "textarea",
-            required: false,
-            label: 'Address',
-            value: ''
+            props: {
+                required: false,
+                label: 'Address',
+                value: ''
+            }
         },
         {
             id: 'dateOfBirth',
             type: "date",
-            required: true,
-            label: 'Date Of Birth',
-            value: ''
+            props: {
+                required: true,
+                label: 'Date Of Birth',
+                value: ''
+            }
         },
         {
             id: 'nationalityId',
-            type: "list",
-            required: true,
-            label: 'Nationality',
-            value: '',
-            list: countries,
-            listDisplayName: 'nationality',
-            listValueName: 'id'
+            type: "select",
+            props: {
+                required: true,
+                label: 'Nationality',
+                value: '',
+                data: countries,
+                dataName: 'nationality',
+                dataValue: 'id'
+            }
         },
         {
             id: 'specialtyId',
-            type: "list",
-            required: false,
-            label: 'Specialty',
-            value: '',
-            list: specialties
+            type: "select",
+            props: {
+                required: false,
+                label: 'Specialty',
+                value: '',
+                data: specialties
+            }
         },
         {
             id: 'workPlaceId',
-            type: "list",
-            required: false,
-            label: 'Work Place',
-            value: '',
-            list: workPlaces
+            type: "select",
+            props: {
+                required: false,
+                label: 'Work Place',
+                value: '',
+                data: workPlaces
+            }
         },
         {
             id: 'facilityId',
-            type: "list",
-            required: false,
-            label: 'Facility',
-            value: '',
-            list: facilities
+            type: "select",
+           props: {
+               required: false,
+               label: 'Facility',
+               value: '',
+               data: facilities
+           }
         }
     ];
-    const [forms, setForm] = useState<FormItem[]>(defaultForm);
+    const [forms, setForm] = useState<FormObject[]>(defaultForm);
     const [selectedUser, setSelectedUser] = useState<User>({});
     const [formId, setFormId] = useState<string>('');
     const [paging, setPaging] = useState<Paging>({
@@ -151,7 +185,7 @@ export  default function Users() {
         setEditState(false);
         setOpenModal(false);
         setSelectedUser({});
-        clearDefaultForm();
+        setForm([...clearDefaultForm(defaultForm)]);
     }
     const openMessageHandler = (options: MessageProps) => {
         setOpenDialog((prevState) => {
@@ -167,26 +201,60 @@ export  default function Users() {
         setEditState(true);
         setSelectedUser(data);
         defaultForm.forEach((item) => {
-            if (item.id === Object.values([item.id])[0]) {
-                if (item.id === 'workPlaceId') {
-                    item.disabled = true
+            if (item.type === 'text') {
+                if (item.id === Object.values([item.id])[0]) {
+                    (item.props as FormInput).value = data[item.id].name;
                 }
-                if (item.id === 'facilityId') {
-                    item.disabled = true
+            }
+            if (item.type === 'textarea') {
+                if (item.id === Object.values([item.id])[0]) {
+                    (item.props as FormTextArea).value = data[item.id];
                 }
-                item.value = data[item.id];
+            }
+            if (item.type === 'select') {
+                if (item.id === Object.values([item.id])[0]) {
+                    (item.props as FormSelect).value = data[item.id];
+                }
+            }
+            if (item.type === 'image') {
+                if (item.id === Object.values([item.id])[0]) {
+                    (item.props as FormImage).image = data[item.id];
+                }
+            }
+            if (item.type === 'time') {
+                if (item.id === Object.values([item.id])[0]) {
+                    (item.props as FormDate).date = new Date(data[item.id]);
+                }
             }
         });
         setForm([...defaultForm]);
         setFormId(data["id"]);
         setOpenModal(true);
     }
-    const clearDefaultForm = () => {
+    const clearDefaultForm = (form: FormObject[]): FormObject[] => {
         setFormId('');
-        defaultForm.forEach((item) => {
-            item.value = ''
+        form.forEach((item) => {
+            if (item.type === 'text') {
+                (item.props as FormInput).value = ''
+            }
+            if (item.type === 'textarea') {
+                (item.props as FormTextArea).value = ''
+            }
+            if (item.type === 'select') {
+                (item.props as FormSelect).value = ''
+            }
+            if (item.type === 'image') {
+                (item.props as FormImage).image = ''
+            }
+            if (item.type === 'date') {
+                (item.props as FormDate).date = new Date()
+            }
+            if (item.type === 'time') {
+                (item.props as FormDate).date = new Date()
+            }
         });
-        setForm([...defaultForm]);
+
+        return form;
     }
     const getDataHandler = () => {
         setLoading(true);
@@ -269,24 +337,18 @@ export  default function Users() {
     }
     const getFacilityHandler = () => {
         setLoading(true);
-        fetch(`${url}Facility/GetFacilities`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth?.accessToken?.token}`
-            }
-        }).then((response) => {
-            response.json().then((result: ApiResponse<Array<Facility>>) => {
+        HttpProvider.get<ApiResponse<Array<Facility>>>(`Facility/GetFacilities`, {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${auth?.accessToken?.token}`
+        })
+            .pipe(finalize(() => setLoading(false)))
+            .subscribe((result) => {
                 setFacilities([...result.data]);
                 setWorkPlaces([...result.data]);
-            }).finally(() => {
-                setLoading(false);
-            });
-
-        }).catch((reason) => {
-
-        });
+            })
     }
     const submitHandler = (form: any) => {
+        console.log(form);
         if (editState) {
             editHandler(form);
         } else {
@@ -295,29 +357,25 @@ export  default function Users() {
     }
     const saveHandler = (form: any) => {
         setLoading(true);
-        fetch(`${url}User/Post`, {
-            method: 'POST',
-            body: JSON.stringify(form),
-            headers: {
+        HttpProvider.post<ApiResponse<any>>('User/Post',
+            JSON.stringify(form), {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${auth?.accessToken?.token}`
-            }
-        }).then((response) => {
-            response.json().then((result: ApiResponse<any>) => {
-                if (result.status === 100) {
-                    getDataHandler();
-                    closeModalHandler();
-                    openMessageHandler({type: "success", message: result.message, open: true});
-                } else {
-                    openMessageHandler({type: "error", message: result.message, open: true});
+            }).pipe(finalize(() => setLoading(false)))
+            .subscribe({
+                next: result => {
+                    if (result.status === 100) {
+                        getDataHandler();
+                        closeModalHandler();
+                        openMessageHandler({type: "success", message: result.message, open: true});
+                    } else {
+                        openMessageHandler({type: "error", message: result.message, open: true});
+                    }
+                },
+                error: err => {
+                    openMessageHandler({type: "error", message: 'something went wrong please try again', open: true});
                 }
-            }).finally(() => {
-                setLoading(false);
-            });
-
-        }).catch((reason) => {
-            openMessageHandler({type: "error", message: 'something went wrong please try again', open: true});
-        });
+            })
     }
     const editHandler = (form: User) => {
         form["id"] = formId;
@@ -327,29 +385,25 @@ export  default function Users() {
         form.userName = selectedUser.userName;
         setLoading(true);
 
-        fetch(`${url}User/Put`, {
-            method: 'PUT',
-            body: JSON.stringify(form),
-            headers: {
+        HttpProvider.put<ApiResponse<any>>('User/Put',
+            JSON.stringify(form), {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${auth?.accessToken?.token}`
-            }
-        }).then((response) => {
-            response.json().then((result: ApiResponse<any>) => {
-                if (result.status === 100) {
-                    getDataHandler();
-                    closeModalHandler();
-                    openMessageHandler({type: "success", message: result.message, open: true});
-                } else {
-                    openMessageHandler({type: "error", message: result.message, open: true});
+            }).pipe(finalize(() => setLoading(false)))
+            .subscribe({
+                next: result => {
+                    if (result.status === 100) {
+                        getDataHandler();
+                        closeModalHandler();
+                        openMessageHandler({type: "success", message: result.message, open: true});
+                    } else {
+                        openMessageHandler({type: "error", message: result.message, open: true});
+                    }
+                },
+                error: err => {
+                    openMessageHandler({type: "error", message: 'something went wrong please try again', open: true});
                 }
-            }).finally(() => {
-                setLoading(false);
-            });
-
-        }).catch((reason) => {
-            openMessageHandler({type: "error", message: 'something went wrong please try again', open: true});
-        });
+            })
     }
 
     useEffect(() => {
@@ -360,6 +414,7 @@ export  default function Users() {
 
     useEffect(() => {
         if (auth.accessToken?.token) {
+            HttpProvider.apiUrl = environment.apiUrl;
             getCountriesHandler()
             getGenderHandler()
             getSpecialtyHandler()
@@ -381,9 +436,9 @@ export  default function Users() {
 
     useEffect(() => {
         if (countries.length > 0) {
-            const newForm = defaultForm.find(u => u.id === 'nationalityId');
-            if(newForm) {
-                newForm.list = countries;
+            const myForm = defaultForm.find(u => u.id === 'nationalityId');
+            if (myForm) {
+                (myForm.props as FormSelect).data = countries;
                 setForm([...defaultForm]);
             }
         }
@@ -391,24 +446,29 @@ export  default function Users() {
 
     useEffect(() => {
         if (facilities.length > 0) {
-            const newForm = defaultForm.find(u => u.id === 'facilityId');
-            if(newForm) {
-                newForm.list = facilities;
-                setForm([...defaultForm]);
-            }
-            const newWork = defaultForm.find(u => u.id === 'workPlaceId');
-            if(newWork) {
-                newWork.list = workPlaces;
+            const myForm = defaultForm.find(u => u.id === 'facilityId');
+            if (myForm) {
+                (myForm.props as FormSelect).data = facilities;
                 setForm([...defaultForm]);
             }
         }
-    }, [facilities, workPlaces]);
+    }, [facilities]);
+
+    useEffect(() => {
+        if (workPlaces.length > 0) {
+            const myWork = defaultForm.find(u => u.id === 'workPlaceId');
+            if (myWork) {
+                (myWork.props as FormSelect).data = workPlaces;
+                setForm([...defaultForm]);
+            }
+        }
+    }, [workPlaces]);
 
     useEffect(() => {
         if (specialties.length > 0) {
-            const newForm = defaultForm.find(u => u.id === 'specialtyId');
-            if(newForm) {
-                newForm.list = specialties;
+            const myForm = defaultForm.find(u => u.id === 'specialtyId');
+            if (myForm) {
+                (myForm.props as FormSelect).data = specialties;
                 setForm([...defaultForm]);
             }
         }
@@ -416,9 +476,9 @@ export  default function Users() {
 
     useEffect(() => {
         if (gender.length > 0) {
-            const newForm = defaultForm.find(u => u.id === 'genderId');
-            if(newForm) {
-                newForm.list = gender;
+            const myForm = defaultForm.find(u => u.id === 'genderId');
+            if (myForm) {
+                (myForm.props as FormSelect).data = gender;
                 setForm([...defaultForm]);
             }
         }
@@ -433,7 +493,7 @@ export  default function Users() {
             {
                 openModal &&
                 <PiModal fullScreen={false} onClose={closeModalHandler}>
-                    <FormBuilder title={'User'} loading={loading} form={forms} onFormSubmit={submitHandler}/>
+                    <Builder title={'User'} loading={loading} form={forms} onFormSubmit={submitHandler}/>
                 </PiModal>
             }
             <div className={'flex flex-col w-full h-full space-y-4 p-2'}>
@@ -471,7 +531,7 @@ export  default function Users() {
                         {
                             loading &&
                             <tr>
-                                <td colSpan={3}>
+                                <td colSpan={6}>
                                     <div className={'flex justify-center w-full'}>
                                         <h1>loading ...</h1>
                                     </div>

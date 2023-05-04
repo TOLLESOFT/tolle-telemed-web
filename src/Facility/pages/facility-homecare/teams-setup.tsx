@@ -1,24 +1,20 @@
-import {environment} from "../../../shared/environment";
 import {useContext, useEffect, useState} from "react";
 import {AuthContext} from "../../../store/auth-provider";
 import {ContextInterface} from "../../../shared/models/context-interface";
 import {MessageProps} from "toll-ui-react/lib/components/pi-message";
+import {Paging} from "../../../shared/models/paging";
 import {FormObject} from "../../../shared/FormBuilder/form-object";
+import {FormInput} from "../../../shared/FormBuilder/form-input";
 import {FormSelect} from "../../../shared/FormBuilder/form-select";
+import {PiButton, PiMessage, PiModal} from "toll-ui-react";
+import {Builder} from "../../../shared/FormBuilder/builder";
+import {PiPagination} from "../../../shared/components/pi-pagination";
 import {HttpProvider} from "../../../store/http-provider";
 import {ApiResponse} from "../../../shared/models/ApiResponse";
 import {finalize} from "rxjs";
-import {PiButton, PiMessage, PiModal, PiSelectList} from "toll-ui-react";
-import {PiPagination} from "../../../shared/components/pi-pagination";
-import {Builder} from "../../../shared/FormBuilder/builder";
-import {FormInput} from "../../../shared/FormBuilder/form-input";
-import {FormTextArea} from "../../../shared/FormBuilder/form-text-area";
-import {FormImage} from "../../../shared/FormBuilder/form-image";
-import {FormDate} from "../../../shared/FormBuilder/form-date";
-import {FormCheckBox} from "../../../shared/FormBuilder/form-check-box";
-import {Paging} from "../../../shared/models/paging";
+import {environment} from "../../../shared/environment";
 
-export  default function CommunitiesSetup() {
+export default function TeamsSetup() {
     const context = useContext(AuthContext);
     const getDefault: ContextInterface = {
         canLogout: () => {},
@@ -34,91 +30,56 @@ export  default function CommunitiesSetup() {
     const [openDialog, setOpenDialog] = useState(messageDialog);
     const [openModal, setOpenModal] = useState<boolean>(false);
     const [editState, setEditState] = useState<boolean>(false);
-    const [regions, setRegions] = useState<any[]>([]);
-    const [countries, setCountries] = useState<any[]>([]);
-    const [country, setCountry] = useState<string>('');
-    const [communities, setCommunities] = useState<any[]>([]);
+    const [teams, setTeams] = useState<any[]>([]);
     const [formId, setFormId] = useState<string>('');
     const [paging, setPaging] = useState<Paging>({ pageSize: 10, pageNumber: 1, totalPages: 0, totalRecords: 0, currentSize: 0 });
-    const regionForm: FormObject[] = [
-     {
-            id: 'regionId',
-            type: "select",
-            props: {
-                required: true,
-                label: 'Region',
-                data: regions,
-                value: ''
-            }
-        },
+    const [users, setUsers] = useState<any[]>([]);
+    const teamForm: FormObject[] = [
         {
             id: 'name',
             type: "text",
             props: {
                 required: true,
-                label: 'Community Name',
+                label: 'Team Name',
                 value: ''
+            }
+        },
+        {
+            id: 'teamLead',
+            type: "select",
+            props: {
+                type: 'single',
+                required: true,
+                label: 'Team Lead',
+                data: users,
+                value: ''
+            }
+        },
+        {
+            id: 'teamMembers',
+            type: "select",
+            props: {
+                type: 'multiple',
+                required: true,
+                label: 'Team Members',
+                data: users,
+                value: []
             }
         }
     ]
-    const [form, setForm] = useState<FormObject[]>(regionForm);
-    const [selectedCommunity, setSelectedCommunity] = useState<any>();
-    const getCountries = () => {
-        setLoading(true);
-        HttpProvider.get<ApiResponse<Array<any>>>(`General/AllCountry`, {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${auth?.accessToken?.token}`
-        }).pipe(finalize(() => setLoading(false)))
-            .subscribe((result) => {
-                setCountries([...result.data]);
-            })
-    }
-
-    const getCommunities = () => {
-        setLoading(true);
-        HttpProvider.get<ApiResponse<Array<any>>>(`HomeCare/GetCommunities`, {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${auth?.accessToken?.token}`
-        }).pipe(finalize(() => setLoading(false)))
-            .subscribe((result) => {
-                setCommunities([...result.data]);
-            })
-    }
-
-    const getRegions = (countryId: any) => {
-        setLoading(true);
-        HttpProvider.get<ApiResponse<Array<any>>>(`General/AllRegions/${countryId}`, {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${auth?.accessToken?.token}`
-        }).pipe(finalize(() => setLoading(false)))
-            .subscribe((result) => {
-                setRegions([...result.data]);
-            })
-    }
+    const [form, setForm] = useState<FormObject[]>(teamForm);
 
     const clearDefaultForm = () => {
         setFormId('');
-        regionForm.forEach((item) => {
+        teamForm.forEach((item) => {
             if (item.type === 'text') {
                 (item.props as FormInput).value = ''
-            }
-            if (item.type === 'textarea') {
-                (item.props as FormTextArea).value = ''
             }
             if (item.type === 'select') {
                 (item.props as FormSelect).value = ''
             }
-            if (item.type === 'image') {
-                (item.props as FormImage).image = ''
-            }
-            if (item.type === 'date') {
-                (item.props as FormDate).date = new Date()
-            }
-            if(item.type === 'checkbox') {
-                (item.props as FormCheckBox).value = false
-            }
         });
-        setForm([...regionForm]);
+        setForm([...teamForm]);
     }
 
     const openModalHandler = () => {
@@ -130,13 +91,6 @@ export  default function CommunitiesSetup() {
         setEditState(false);
         setOpenModal(false);
     }
-
-    const editCommunitiesForm = (data: any) => {
-        setEditState(true);
-        setSelectedCommunity(data);
-        setCountry(data.region.countryId);
-    }
-
     const openMessageHandler = (options: MessageProps) => {
         setOpenDialog((prevState) => {
             return {...prevState, open: options.open, message: options.message, type: options.type }
@@ -149,6 +103,52 @@ export  default function CommunitiesSetup() {
         });
     }
 
+    const getTeams = () => {
+        setLoading(true);
+        HttpProvider.get<ApiResponse<Array<any>>>(`Teams`, {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${auth?.accessToken?.token}`
+        }).pipe(finalize(() => setLoading(false)))
+            .subscribe((result) => {
+                setTeams([...result.data]);
+            })
+    }
+
+    const getNurses = () => {
+        setLoading(true);
+        HttpProvider.get<ApiResponse<Array<any>>>(`User/GetAllNurses`, {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${auth?.accessToken?.token}`
+        }).pipe(finalize(() => setLoading(false)))
+            .subscribe((result) => {
+                setUsers([...result.data]);
+            })
+    }
+
+    const editTeam = (data: any) => {
+        setEditState(true);
+        form.forEach((item) => {
+            if (item.type === 'select') {
+                if (item.id === Object.values([item.id])[0]) {
+                    const select = (item.props as FormSelect);
+                    if (select.type === 'single' || select.type === undefined) {
+                        (item.props as FormSelect).value = data[item.id];
+                    } else {
+                        (item.props as FormSelect).value = String(data[item.id]).split(',');
+                    }
+                }
+            }
+            if (item.type === 'text') {
+                if (item.id === Object.values([item.id])[0]) {
+                    (item.props as FormInput).value = data[item.id];
+                }
+            }
+        });
+        setForm([...form]);
+        setFormId(data.id);
+        setOpenModal(true);
+    }
+
     const submitHandler = (form: any) => {
         if (editState) {
             editHandler(form);
@@ -159,7 +159,7 @@ export  default function CommunitiesSetup() {
 
     const saveHandler = (form: any) => {
         setLoading(true);
-        HttpProvider.post<ApiResponse<any>>('HomeCare/PostCommunities',
+        HttpProvider.post<ApiResponse<any>>('Teams/Post',
             JSON.stringify(form), {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${auth?.accessToken?.token}`
@@ -167,7 +167,7 @@ export  default function CommunitiesSetup() {
             .subscribe({
                 next: result => {
                     if (result.status === 100) {
-                        getCommunities();
+                        getTeams();
                         closeModalHandler();
                         openMessageHandler({type: "success", message: result.message, open: true});
                     } else {
@@ -180,7 +180,7 @@ export  default function CommunitiesSetup() {
     const editHandler = (form: any) => {
         setLoading(true);
         form.id = formId;
-        HttpProvider.put<ApiResponse<any>>('HomeCare/PutCommunities',
+        HttpProvider.put<ApiResponse<any>>('Teams/Put',
             JSON.stringify(form), {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${auth?.accessToken?.token}`
@@ -188,7 +188,7 @@ export  default function CommunitiesSetup() {
             .subscribe({
                 next: result => {
                     if (result.status === 100) {
-                        getCommunities();
+                        getTeams();
                         closeModalHandler();
                         openMessageHandler({type: "success", message: result.message, open: true});
                     } else {
@@ -199,6 +199,16 @@ export  default function CommunitiesSetup() {
     }
 
     useEffect(() => {
+        if (users.length > 0) {
+            const myForm = form.find(u => u.id === 'teamLead');
+            if (myForm) {
+                (myForm.props as FormSelect).data = users;
+            }
+            setForm([...form]);
+        }
+    }, [users])
+
+    useEffect(() => {
         setAuth((prevState) => {
             return {...prevState, user: context.user, accessToken: context.accessToken }
         });
@@ -207,43 +217,10 @@ export  default function CommunitiesSetup() {
     useEffect(() => {
         if (auth.accessToken?.token) {
             HttpProvider.apiUrl = environment.apiUrl;
-            getCountries();
-            getCommunities();
+            getTeams();
+            getNurses();
         }
     }, [auth])
-
-    useEffect(() => {
-        if (regions.length > 0) {
-            const myForm = form.find(u => u.id === 'regionId');
-            if (myForm) {
-                (myForm.props as FormSelect).data = regions;
-                if(editState) {
-                    form.forEach((item) => {
-                        if (item.type === 'select') {
-                            if (item.id === Object.values([item.id])[0]) {
-                                (item.props as FormSelect).value = selectedCommunity[item.id];
-                            }
-                        }
-                        if (item.type === 'text') {
-                            if (item.id === Object.values([item.id])[0]) {
-                                (item.props as FormInput).value = selectedCommunity[item.id];
-                            }
-                        }
-                    });
-                    setForm([...form]);
-                    setFormId(selectedCommunity.id);
-                    setOpenModal(true);
-                }
-            }
-        }
-    }, [regions, selectedCommunity, editState])
-
-    useEffect(() => {
-        if(country) {
-            getRegions(country);
-        }
-    }, [country])
-
     return (
         <>
             {
@@ -253,25 +230,15 @@ export  default function CommunitiesSetup() {
             {
                 openModal &&
                 <PiModal fullScreen={false} onClose={closeModalHandler}>
-                    <div>
-                        <PiSelectList
-                            rounded={'rounded'}
-                            label={'Countries'}
-                            onValueChange={(e) => {
-                                setCountry(e);
-                            }}
-                            data={countries}
-                            value={country}
-                            dataValue={'id'}
-                            dataLabel={'name'}/>
+                    <div className={'min-h-[600px] w-full'}>
+                        <Builder loading={loading} form={form}  onFormSubmit={submitHandler}/>
                     </div>
-                    <Builder loading={loading} form={form} onFormSubmit={submitHandler}/>
                 </PiModal>
             }
             <div className={'flex flex-col w-full h-full space-y-4 p-2'}>
                 <div className={'h-auto w-full flex justify-between'}>
                     <PiButton onClick={openModalHandler} type={'primary'} size={'small'} rounded={'rounded'}>
-                        <i className={'pi pi-plus'}></i> <span className={'ml-2'}>Add Community</span>
+                        <i className={'pi pi-plus'}></i> <span className={'ml-2'}>Create Team</span>
                     </PiButton>
 
                     <PiPagination
@@ -307,15 +274,15 @@ export  default function CommunitiesSetup() {
                             </tr>
                         }
                         {
-                            communities.length > 0 && !loading &&
+                            teams.length > 0 && !loading &&
                             <>
                                 {
-                                    communities.map((community) =>
-                                        <tr key={community.id}>
-                                            <td className={'border-slate-700 border p-1'}>{community.name}</td>
+                                    teams.map((team) =>
+                                        <tr key={team.id}>
+                                            <td className={'border-slate-700 border p-1'}>{team.name}</td>
                                             <td className={'border-slate-700 border p-1'}>
                                                 <div className={'flex space-x-2'}>
-                                                    <PiButton rounded={'rounded'} size={'extra small'} type={'success'} onClick={() => editCommunitiesForm(community)}>EDIT</PiButton>
+                                                    <PiButton rounded={'rounded'} size={'extra small'} type={'success'} onClick={() => editTeam(team)}>EDIT</PiButton>
                                                 </div>
                                             </td>
                                         </tr>

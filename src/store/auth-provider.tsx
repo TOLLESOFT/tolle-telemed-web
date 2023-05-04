@@ -55,6 +55,11 @@ export const AuthProvider = (props: any) => {
             //     console.log('Error while starting connection ' + err);
             // });
 
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark')
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
             setState((prevState) => {
                 return { ...prevState,
                     accessToken: accessObj.accessToken,

@@ -70,14 +70,17 @@ export default function FacilityHomecareOutlet() {
                             {
                                 auth.user?.role?.normalizedName === 'SYSTEM ADMINISTRATOR' &&
                                 <>
-                                    <div onClick={() => route('/home-care/communities')} className={'flex space-x-2 items-center text-base dark:hover:bg-gray-800 px-2 py-1 rounded-lg cursor-pointer'}>
+                                    <div onClick={() => route('/home-care/communities')} className={`flex space-x-2 ${window.location.pathname === '/home-care/communities' && 'bg-blue-400'} items-center text-base dark:hover:bg-gray-800 px-2 py-1 rounded-lg cursor-pointer`}>
                                         <span className={'cursor-pointer'}>Communities</span>
                                     </div>
-                                    <div onClick={() => route('/home-care/PolyKiosks')} className={'flex space-x-2 items-center text-base dark:hover:bg-gray-800 px-2 py-1 rounded-lg cursor-pointer'}>
+                                    <div onClick={() => route('/home-care/poly-kiosks')} className={`flex space-x-2 ${window.location.pathname === '/home-care/poly-kiosks' && 'bg-blue-400'} items-center text-base dark:hover:bg-gray-800 px-2 py-1 rounded-lg cursor-pointer`}>
                                         <span className={'cursor-pointer'}>Poly Kiosks</span>
                                     </div>
-                                    <div onClick={() => route('/home-care/activities')} className={'flex space-x-2 items-center text-base dark:hover:bg-gray-800 px-2 py-1 rounded-lg cursor-pointer'}>
+                                    <div onClick={() => route('/home-care/activities')} className={`flex space-x-2 ${window.location.pathname === '/home-care/activities' && 'bg-blue-400'} items-center text-base dark:hover:bg-gray-800 px-2 py-1 rounded-lg cursor-pointer`}>
                                         <span className={'cursor-pointer'}>Activities</span>
+                                    </div>
+                                    <div onClick={() => route('/home-care/teams')} className={`flex space-x-2 ${window.location.pathname === '/home-care/teams' && 'bg-blue-400'} items-center text-base dark:hover:bg-gray-800 px-2 py-1 rounded-lg cursor-pointer`}>
+                                        <span className={'cursor-pointer'}>Teams</span>
                                     </div>
                                 </>
                             }
