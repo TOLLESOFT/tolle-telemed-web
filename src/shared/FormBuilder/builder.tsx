@@ -122,10 +122,10 @@ export const Builder = (props: Props) => {
     }
   }, [forms])
 
-  const selectListValueChange = useCallback((event: any, index: number) => {
+  const selectListValueChange = (event: any, index: number) => {
     (forms[index].props as FormSelect).value = event;
     setForm([...forms]);
-  }, [forms])
+  }
 
   useEffect(() => {
     console.log('ff prop', props.form);

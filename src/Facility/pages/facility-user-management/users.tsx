@@ -8,8 +8,7 @@ import {Paging} from "../../../shared/models/paging";
 import {PagedResponse} from "../../../shared/models/PagedResponse";
 import {Facility} from "../../../shared/models/Facility";
 import {ApiResponse} from "../../../shared/models/ApiResponse";
-import {PiAvatar, PiButton, PiMessage, PiModal} from "toll-ui-react";
-import {FormBuilder} from "../../../shared/FormBuilder/form-builder";
+import {PiAvatar, PiButton, PiLoader, PiLoading, PiMessage, PiModal} from "toll-ui-react";
 import {PiPagination} from "../../../shared/components/pi-pagination";
 import {User} from "../../../shared/models/User";
 import {Country} from "../../../shared/models/country";
@@ -25,9 +24,9 @@ import {FormTextArea} from "../../../shared/FormBuilder/form-text-area";
 import {Builder} from "../../../shared/FormBuilder/builder";
 import {HttpProvider} from "../../../store/http-provider";
 import {finalize} from "rxjs";
+import {Role} from "../../../shared/models/Role";
 
 export  default function Users() {
-    const url = environment.apiUrl;
     const context = useContext(AuthContext);
     const getDefault: ContextInterface = {
         canLogout: () => {},
@@ -37,6 +36,7 @@ export  default function Users() {
     const [users, setUsers] = useState<Array<UserModel>>([]);
     const [editState, setEditState] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
+    const [usersLoading, setUsersLoading] = useState<boolean>(false);
     const messageDialog: MessageProps = {
         open: false,
         message: '',
@@ -44,11 +44,13 @@ export  default function Users() {
     }
     const [openDialog, setOpenDialog] = useState(messageDialog);
     const [openModal, setOpenModal] = useState<boolean>(false);
+    const [openRoleModal, setOpenRoleModal] = useState<boolean>(false);
     const [countries, setCountries] = useState<Country[]>([]);
     const [gender, setGenders] = useState<Gender[]>([]);
     const [specialties, setSpecialties] = useState<Specialty[]>([]);
     const [workPlaces, setWorkPlaces] = useState<Facility[]>([]);
     const [facilities, setFacilities] = useState<Facility[]>([]);
+    const [roles, setRoles] = useState<Role[]>([]);
     const defaultForm: FormObject[] = [
         {
             id: 'image',
@@ -56,7 +58,8 @@ export  default function Users() {
             props: {
                 required: true,
                 label: 'User Photo',
-                value: ''
+                value: '',
+                type: "single"
             }
         },
         {
@@ -167,6 +170,18 @@ export  default function Users() {
            }
         }
     ];
+    const [roleForm, setRoleForm] = useState<FormObject[]>([{
+        id: 'name',
+        type: "select",
+        props: {
+            required: true,
+            label: 'Role',
+            value: '',
+            data: roles,
+            dataValue: 'name',
+            dataName: 'name'
+        }
+    }]);
     const [forms, setForm] = useState<FormObject[]>(defaultForm);
     const [selectedUser, setSelectedUser] = useState<User>({});
     const [formId, setFormId] = useState<string>('');
@@ -187,6 +202,17 @@ export  default function Users() {
         setSelectedUser({});
         setForm([...clearDefaultForm(defaultForm)]);
     }
+
+    const openRoleModalHandler = (data: any) => {
+        setSelectedUser(data);
+        setOpenRoleModal(true);
+    }
+    const closeRoleModalHandler = () => {
+        setEditState(false);
+        setOpenRoleModal(false);
+        setSelectedUser({});
+        setRoleForm([...clearDefaultForm(roleForm)]);
+    }
     const openMessageHandler = (options: MessageProps) => {
         setOpenDialog((prevState) => {
             return {...prevState, open: options.open, message: options.message, type: options.type }
@@ -203,7 +229,7 @@ export  default function Users() {
         defaultForm.forEach((item) => {
             if (item.type === 'text') {
                 if (item.id === Object.values([item.id])[0]) {
-                    (item.props as FormInput).value = data[item.id].name;
+                    (item.props as FormInput).value = data[item.id];
                 }
             }
             if (item.type === 'textarea') {
@@ -221,7 +247,7 @@ export  default function Users() {
                     (item.props as FormImage).image = data[item.id];
                 }
             }
-            if (item.type === 'time') {
+            if (item.type === 'date') {
                 if (item.id === Object.values([item.id])[0]) {
                     (item.props as FormDate).date = new Date(data[item.id]);
                 }
@@ -256,15 +282,23 @@ export  default function Users() {
 
         return form;
     }
-    const getDataHandler = () => {
+    const getUserRoles = () => {
         setLoading(true);
-        fetch(`${url}User/GetAll?pageSize=${paging.pageSize}&pageNumber=${paging.pageNumber}`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth?.accessToken?.token}`
-            }
-        }).then((response) => {
-            response.json().then((result: PagedResponse<Array<UserModel>>) => {
+        HttpProvider.get<ApiResponse<Array<any>>>(`User/GetRoles`, {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${auth?.accessToken?.token}`
+        }).pipe(finalize(() => setLoading(false)))
+            .subscribe((result) => {
+                setRoles([...result.data]);
+            })
+    }
+    const getDataHandler = () => {
+        setUsersLoading(true);
+        HttpProvider.get<PagedResponse<Array<UserModel>>>(`User/GetAll?pageSize=${paging.pageSize}&pageNumber=${paging.pageNumber}`, {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${auth?.accessToken?.token}`
+        }).pipe(finalize(() => setUsersLoading(false)))
+            .subscribe((result) => {
                 const data: Array<UserModel> = [];
                 result.data.forEach((rate) => {
                     data.push(rate);
@@ -273,67 +307,40 @@ export  default function Users() {
                 setPaging(prevState => {
                     return { ...prevState, pageSize: result.pageSize, totalPages: result.totalPages, totalRecords: result.totalRecords, currentSize: result.data.length}
                 });
-            }).finally(() => {
-                setLoading(false);
-            });
-
-        }).catch((reason) => {
-
-        });
+            })
     }
     const getCountriesHandler = () => {
         setLoading(true);
-        fetch(`${url}General/AllCountry`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth?.accessToken?.token}`
-            }
-        }).then((response) => {
-            response.json().then((result: ApiResponse<Array<Country>>) => {
+        HttpProvider.get<ApiResponse<Array<Country>>>(`General/AllCountry`, {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${auth?.accessToken?.token}`
+        })
+            .pipe(finalize(() => setLoading(false)))
+            .subscribe((result) => {
                 setCountries([...result.data]);
-            }).finally(() => {
-                setLoading(false);
-            });
-
-        }).catch((reason) => {
-
-        });
+            })
     }
     const getGenderHandler = () => {
         setLoading(true);
-        fetch(`${url}General/Gender`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth?.accessToken?.token}`
-            }
-        }).then((response) => {
-            response.json().then((result: Array<Gender>) => {
+        HttpProvider.get<Array<Gender>>(`General/Gender`, {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${auth?.accessToken?.token}`
+        })
+            .pipe(finalize(() => setLoading(false)))
+            .subscribe((result) => {
                 setGenders([...result]);
-            }).finally(() => {
-                setLoading(false);
-            });
-
-        }).catch((reason) => {
-
-        });
+            })
     }
     const getSpecialtyHandler = () => {
         setLoading(true);
-        fetch(`${url}General/AllSpecialty`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth?.accessToken?.token}`
-            }
-        }).then((response) => {
-            response.json().then((result: Array<Specialty>) => {
+        HttpProvider.get<Array<Specialty>>(`General/AllSpecialty`, {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${auth?.accessToken?.token}`
+        })
+            .pipe(finalize(() => setLoading(false)))
+            .subscribe((result) => {
                 setSpecialties([...result]);
-            }).finally(() => {
-                setLoading(false);
-            });
-
-        }).catch((reason) => {
-
-        });
+            })
     }
     const getFacilityHandler = () => {
         setLoading(true);
@@ -348,7 +355,6 @@ export  default function Users() {
             })
     }
     const submitHandler = (form: any) => {
-        console.log(form);
         if (editState) {
             editHandler(form);
         } else {
@@ -405,7 +411,29 @@ export  default function Users() {
                 }
             })
     }
-
+    const saveRoleHandler = (form: any) => {
+        setLoading(true);
+        form.userId = selectedUser.id;
+        HttpProvider.post<ApiResponse<any>>('User/AddUserToRole',
+            JSON.stringify(form), {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${auth?.accessToken?.token}`
+            }).pipe(finalize(() => setLoading(false)))
+            .subscribe({
+                next: result => {
+                    if (result.status === 100) {
+                        getDataHandler();
+                        closeRoleModalHandler();
+                        openMessageHandler({type: "success", message: result.message, open: true});
+                    } else {
+                        openMessageHandler({type: "error", message: result.message, open: true});
+                    }
+                },
+                error: err => {
+                    openMessageHandler({type: "error", message: 'something went wrong please try again', open: true});
+                }
+            })
+    }
     useEffect(() => {
         setAuth((prevState) => {
             return {...prevState, user: context.user, accessToken: context.accessToken }
@@ -419,20 +447,16 @@ export  default function Users() {
             getGenderHandler()
             getSpecialtyHandler()
             getFacilityHandler()
+            getUserRoles();
         }
     }, [auth])
 
     useEffect(() => {
         if (auth.accessToken?.token) {
+            HttpProvider.apiUrl = environment.apiUrl;
             getDataHandler();
         }
     }, [paging.pageSize, auth])
-
-    useEffect(() => {
-        if (auth.accessToken?.token) {
-            getDataHandler();
-        }
-    }, [paging.pageNumber, auth])
 
     useEffect(() => {
         if (countries.length > 0) {
@@ -483,7 +507,15 @@ export  default function Users() {
             }
         }
     }, [gender]);
-
+    useEffect(() => {
+        if (roles.length > 0) {
+            const myForm = roleForm.find(u => u.id === 'name');
+            if (myForm) {
+                (myForm.props as FormSelect).data = roles;
+                setRoleForm([...roleForm]);
+            }
+        }
+    }, [roles]);
     return (
         <>
             {
@@ -494,6 +526,14 @@ export  default function Users() {
                 openModal &&
                 <PiModal fullScreen={false} onClose={closeModalHandler}>
                     <Builder title={'User'} loading={loading} form={forms} onFormSubmit={submitHandler}/>
+                </PiModal>
+            }
+            {
+                openRoleModal &&
+                <PiModal fullScreen={false} onClose={closeRoleModalHandler}>
+                    <div className={'min-h-[600px] w-full'}>
+                        <Builder title={'User Role'} loading={loading} form={roleForm} onFormSubmit={saveRoleHandler}/>
+                    </div>
                 </PiModal>
             }
             <div className={'flex flex-col w-full h-full space-y-4 p-2'}>
@@ -529,17 +569,17 @@ export  default function Users() {
                         </thead>
                         <tbody>
                         {
-                            loading &&
+                            usersLoading &&
                             <tr>
                                 <td colSpan={6}>
                                     <div className={'flex justify-center w-full'}>
-                                        <h1>loading ...</h1>
+                                        <PiLoading  loading={usersLoading}/>
                                     </div>
                                 </td>
                             </tr>
                         }
                         {
-                            users.length > 0 && !loading &&
+                            users.length > 0 && !usersLoading &&
                             <>
                                 {
                                     users.map((user) =>
@@ -548,11 +588,14 @@ export  default function Users() {
                                                 <PiAvatar image={user.user.image}/>
                                             </td>
                                             <td className={'border-slate-700 border p-1'}>{user.user.firstName} {user.user.lastName}</td>
-                                            <td className={'border-slate-700 border p-1'}>{user.role.name}</td>
+                                            <td className={'border-slate-700 border p-1'}>{user.role?.name}</td>
                                             <td className={'border-slate-700 border p-1'}>{user.user.email}</td>
                                             <td className={'border-slate-700 border p-1'}>{user.user.gender?.name}</td>
                                             <td className={'border-slate-700 border p-1'}>
-                                                <PiButton rounded={'rounded'} size={'extra small'} type={'success'} onClick={() => editUser(user.user)}>EDIT</PiButton>
+                                                <div className={'flex justify-center w-full space-x-3'}>
+                                                    <PiButton rounded={'rounded'} size={'extra small'} type={'success'} onClick={() => editUser(user.user)}>EDIT</PiButton>
+                                                    <PiButton rounded={'rounded'} size={'extra small'} type={'success'} onClick={() => openRoleModalHandler(user.user)}>UPDATE ROLE</PiButton>
+                                                </div>
                                             </td>
                                         </tr>
                                     )

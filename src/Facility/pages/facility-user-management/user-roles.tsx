@@ -7,7 +7,7 @@ import {FormItem} from "../../../shared/FormBuilder/form-item";
 import {ApiResponse} from "../../../shared/models/ApiResponse";
 import {Role} from "../../../shared/models/Role";
 import {Paging} from "../../../shared/models/paging";
-import { PiButton, PiMessage, PiModal} from "toll-ui-react";
+import {PiButton, PiLoading, PiMessage, PiModal} from "toll-ui-react";
 import {FormBuilder} from "../../../shared/FormBuilder/form-builder";
 import {PagedResponse} from "../../../shared/models/PagedResponse";
 import {Facility} from "../../../shared/models/Facility";
@@ -19,7 +19,6 @@ import {UserPermissions} from "./user-permissions";
 import {PiLoader} from "../../../shared/components/pi-loader";
 
 export default function UserRoles() {
-    const url = environment.apiUrl;
     const context = useContext(AuthContext);
     const getDefault: ContextInterface = {
         canLogout: () => {},
@@ -103,13 +102,12 @@ export default function UserRoles() {
     }
     const getDataHandler = () => {
         setLoading(true);
-        fetch(`${url}User/GetAllRoles?pageSize=${paging.pageSize}&pageNumber=${paging.pageNumber}`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth?.accessToken?.token}`
-            }
-        }).then((response) => {
-            response.json().then((result: PagedResponse<Array<Facility>>) => {
+        HttpProvider.get<PagedResponse<Array<Facility>>>(`User/GetAllRoles?pageSize=${paging.pageSize}&pageNumber=${paging.pageNumber}`, {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${auth?.accessToken?.token}`
+        })
+            .pipe(finalize(() => setLoading(false)))
+            .subscribe((result) => {
                 const data: Array<Facility> = [];
                 result.data.forEach((rate) => {
                     data.push(rate);
@@ -118,13 +116,7 @@ export default function UserRoles() {
                 setPaging(prevState => {
                     return { ...prevState, pageSize: result.pageSize, totalPages: result.totalPages, totalRecords: result.totalRecords, currentSize: result.data.length}
                 });
-            }).finally(() => {
-                setLoading(false);
-            });
-
-        }).catch((reason) => {
-
-        });
+            })
     }
     const submitHandler = (form: any) => {
         if (editState) {
@@ -135,29 +127,25 @@ export default function UserRoles() {
     }
     const saveHandler = (form: any) => {
         setLoading(true);
-        fetch(`${url}User/AddRole`, {
-            method: 'POST',
-            body: JSON.stringify(form),
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth?.accessToken?.token}`
-            }
-        }).then((response) => {
-            response.json().then((result: ApiResponse<any>) => {
-                if (result.status === 100) {
-                    getDataHandler();
-                    closeModalHandler();
-                    openMessageHandler({type: "success", message: result.message, open: true});
-                } else {
-                    openMessageHandler({type: "error", message: result.message, open: true});
+        HttpProvider.post<ApiResponse<any>>(
+            'User/AddRole',
+            JSON.stringify(form),
+            BaseService.HttpHeaders())
+            .pipe(finalize(() => setLoading(false)))
+            .subscribe({
+                next: (result) => {
+                    if (result.status === 100) {
+                        getDataHandler();
+                        closeModalHandler();
+                        openMessageHandler({type: "success", message: result.message, open: true});
+                    } else {
+                        openMessageHandler({type: "error", message: result.message, open: true});
+                    }
+                },
+                error: err => {
+                    openMessageHandler({type: "error", message: 'something went wrong please try again', open: true});
                 }
-            }).finally(() => {
-                setLoading(false);
-            });
-
-        }).catch((reason) => {
-            openMessageHandler({type: "error", message: 'something went wrong please try again', open: true});
-        });
+            })
     }
     const editHandler = (form: any) => {
         form["id"] = formId;
@@ -218,15 +206,10 @@ export default function UserRoles() {
 
     useEffect(() => {
         if (auth.accessToken?.token) {
+            HttpProvider.apiUrl = environment.apiUrl;
             getDataHandler();
         }
     }, [paging.pageSize, auth])
-
-    useEffect(() => {
-        if (auth.accessToken?.token) {
-            getDataHandler();
-        }
-    }, [paging.pageNumber, auth])
 
     return (
         <>
@@ -295,7 +278,7 @@ export default function UserRoles() {
                             <tr>
                                 <td colSpan={3}>
                                     <div className={'flex justify-center w-full'}>
-                                        <h1>loading ...</h1>
+                                        <PiLoading  loading={loading}/>
                                     </div>
                                 </td>
                             </tr>

@@ -6,13 +6,15 @@ import {Paging} from "../../../shared/models/paging";
 import {FormObject} from "../../../shared/FormBuilder/form-object";
 import {FormInput} from "../../../shared/FormBuilder/form-input";
 import {FormSelect} from "../../../shared/FormBuilder/form-select";
-import {PiButton, PiMessage, PiModal} from "toll-ui-react";
+import {PiButton, PiLoading, PiMessage, PiModal} from "toll-ui-react";
 import {Builder} from "../../../shared/FormBuilder/builder";
 import {PiPagination} from "../../../shared/components/pi-pagination";
 import {HttpProvider} from "../../../store/http-provider";
 import {ApiResponse} from "../../../shared/models/ApiResponse";
 import {finalize} from "rxjs";
 import {environment} from "../../../shared/environment";
+import {UserModel} from "../../../shared/models/UserModel";
+import {PagedResponse} from "../../../shared/models/PagedResponse";
 
 export default function TeamsSetup() {
     const context = useContext(AuthContext);
@@ -61,7 +63,7 @@ export default function TeamsSetup() {
             props: {
                 type: 'multiple',
                 required: true,
-                label: 'Team Members',
+                label: 'Team Members (this is a multi select)',
                 data: users,
                 value: []
             }
@@ -76,7 +78,12 @@ export default function TeamsSetup() {
                 (item.props as FormInput).value = ''
             }
             if (item.type === 'select') {
-                (item.props as FormSelect).value = ''
+                if ((item.props as FormSelect).type === 'single') {
+                    (item.props as FormSelect).value = '';
+                }
+                if ((item.props as FormSelect).type === 'multiple') {
+                    (item.props as FormSelect).value = [];
+                }
             }
         });
         setForm([...teamForm]);
@@ -105,12 +112,20 @@ export default function TeamsSetup() {
 
     const getTeams = () => {
         setLoading(true);
-        HttpProvider.get<ApiResponse<Array<any>>>(`Teams`, {
+        HttpProvider.get<PagedResponse<Array<any>>>(`Teams/GetAllPaginated?pageSize=${paging.pageSize}&pageNumber=${paging.pageNumber}`, {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${auth?.accessToken?.token}`
         }).pipe(finalize(() => setLoading(false)))
             .subscribe((result) => {
                 setTeams([...result.data]);
+                const data: Array<any> = [];
+                result.data.forEach((rate) => {
+                    data.push(rate);
+                });
+                setTeams([...data]);
+                setPaging(prevState => {
+                    return { ...prevState, pageSize: result.pageSize, totalPages: result.totalPages, totalRecords: result.totalRecords, currentSize: result.data.length}
+                });
             })
     }
 
@@ -159,7 +174,7 @@ export default function TeamsSetup() {
 
     const saveHandler = (form: any) => {
         setLoading(true);
-        HttpProvider.post<ApiResponse<any>>('Teams/Post',
+        HttpProvider.post<ApiResponse<any>>('Teams',
             JSON.stringify(form), {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${auth?.accessToken?.token}`
@@ -180,7 +195,7 @@ export default function TeamsSetup() {
     const editHandler = (form: any) => {
         setLoading(true);
         form.id = formId;
-        HttpProvider.put<ApiResponse<any>>('Teams/Put',
+        HttpProvider.put<ApiResponse<any>>('Teams',
             JSON.stringify(form), {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${auth?.accessToken?.token}`
@@ -204,6 +219,10 @@ export default function TeamsSetup() {
             if (myForm) {
                 (myForm.props as FormSelect).data = users;
             }
+            const myMembersForm = form.find(u => u.id === 'teamMembers');
+            if (myMembersForm) {
+                (myMembersForm.props as FormSelect).data = users;
+            }
             setForm([...form]);
         }
     }, [users])
@@ -217,10 +236,16 @@ export default function TeamsSetup() {
     useEffect(() => {
         if (auth.accessToken?.token) {
             HttpProvider.apiUrl = environment.apiUrl;
-            getTeams();
             getNurses();
         }
     }, [auth])
+
+    useEffect(() => {
+        if (auth.accessToken?.token) {
+            HttpProvider.apiUrl = environment.apiUrl;
+            getTeams();
+        }
+    }, [paging.pageSize, auth])
     return (
         <>
             {
@@ -268,7 +293,7 @@ export default function TeamsSetup() {
                             <tr>
                                 <td colSpan={3}>
                                     <div className={'flex justify-center w-full'}>
-                                        <h1>loading ...</h1>
+                                        <PiLoading loading={loading}/>
                                     </div>
                                 </td>
                             </tr>
