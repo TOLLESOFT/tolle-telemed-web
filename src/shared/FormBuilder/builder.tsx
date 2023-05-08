@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useState} from "react";
-import {PiButton, PiCheckbox, PiImagePicker, PiInput, PiMultiSelectList, PiSelectList, PiTextArea} from "toll-ui-react";
+import {PiButton, PiCheckbox, PiImagePicker, PiInput, PiSelectList, PiTextArea} from "toll-ui-react";
 import {FormObject} from "./form-object";
 import {FormDate} from "./form-date";
 import {isValid} from "date-fns";
@@ -11,6 +11,7 @@ import {FormCheckBox} from "./form-check-box";
 import { PiDatepicker } from "../components/pi-datepicker";
 import {FormTime} from "./form-time";
 import {PiTimepicker} from "../components/pi-timepicker";
+import {PiMultiSelectList} from "./pi-multi-select-list";
 
 interface Props {
   form: FormObject[];
@@ -124,6 +125,7 @@ export const Builder = (props: Props) => {
 
   const selectListValueChange = (event: any, index: number) => {
     (forms[index].props as FormSelect).value = event;
+    console.log('select build',event);
     setForm([...forms]);
   }
 

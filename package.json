@@ -24,7 +24,7 @@
     "react-scripts": "5.0.1",
     "rxjs": "^7.8.0",
     "sass": "^1.57.1",
-    "toll-ui-react": "^1.5.8-alpha",
+    "toll-ui-react": "^1.6.2-alpha",
     "typescript": "^4.9.4",
     "web-vitals": "^2.1.4"
   },

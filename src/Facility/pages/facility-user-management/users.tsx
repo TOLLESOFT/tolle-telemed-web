@@ -454,7 +454,9 @@ export  default function Users() {
     useEffect(() => {
         if (auth.accessToken?.token) {
             HttpProvider.apiUrl = environment.apiUrl;
-            getDataHandler();
+            if (paging.pageSize > 0) {
+                getDataHandler();
+            }
         }
     }, [paging.pageSize, auth])
 
