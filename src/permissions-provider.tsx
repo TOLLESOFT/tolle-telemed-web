@@ -41,6 +41,7 @@ import PolyKioskSetup from "./Facility/pages/facility-homecare/poly-kiosk-setup"
 import ActivitiesSetup from "./Facility/pages/facility-homecare/activities-setup";
 import ErrorPage from "./error-page";
 import TeamsSetup from "./Facility/pages/facility-homecare/teams-setup";
+import SubscriptionsSetup from "./Facility/pages/facility-homecare/subscriptions-setup";
 
 export default function PermissionsProvider() {
 
@@ -177,6 +178,10 @@ export default function PermissionsProvider() {
                         {
                             path: 'home-care/teams',
                             element: <TeamsSetup/>
+                        },
+                        {
+                            path: 'home-care/subscriptions',
+                            element: <SubscriptionsSetup/>
                         }
                     ]
                 },

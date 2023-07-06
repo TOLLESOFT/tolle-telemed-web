@@ -18,6 +18,10 @@ body,
   }
 }
 
+td {
+  text-align: center !important;
+}
+
 *::-webkit-scrollbar-track
 {
   background-color: transparent;

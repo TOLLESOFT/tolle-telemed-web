@@ -133,6 +133,7 @@ export const Builder = (props: Props) => {
     console.log('ff prop', props.form);
     setForm([...props.form])
   }, [props.form])
+
   return (
       <>
         <h1>

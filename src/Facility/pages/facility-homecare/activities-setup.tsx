@@ -10,7 +10,7 @@ import {ApiResponse} from "../../../shared/models/ApiResponse";
 import {finalize} from "rxjs";
 import {FormInput} from "../../../shared/FormBuilder/form-input";
 import {FormCheckBox} from "../../../shared/FormBuilder/form-check-box";
-import {PiButton, PiMessage, PiModal, PiSelectList} from "toll-ui-react";
+import {PiButton, PiLoading, PiMessage, PiModal} from "toll-ui-react";
 import {Builder} from "../../../shared/FormBuilder/builder";
 import {PiPagination} from "../../../shared/components/pi-pagination";
 import {FormSelect} from "../../../shared/FormBuilder/form-select";
@@ -179,6 +179,7 @@ export default function ActivitiesSetup() {
             getActivities();
         }
     }, [auth])
+
     return (
         <>
             {
@@ -224,7 +225,7 @@ export default function ActivitiesSetup() {
                             <tr>
                                 <td colSpan={3}>
                                     <div className={'flex justify-center w-full'}>
-                                        <h1>loading ...</h1>
+                                        <PiLoading loading={loading}/>
                                     </div>
                                 </td>
                             </tr>

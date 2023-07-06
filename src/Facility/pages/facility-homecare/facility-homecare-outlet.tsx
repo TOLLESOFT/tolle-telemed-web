@@ -82,6 +82,9 @@ export default function FacilityHomecareOutlet() {
                                     <div onClick={() => route('/home-care/teams')} className={`flex space-x-2 ${window.location.pathname === '/home-care/teams' && 'bg-blue-400'} items-center text-base dark:hover:bg-gray-800 px-2 py-1 rounded-lg cursor-pointer`}>
                                         <span className={'cursor-pointer'}>Teams</span>
                                     </div>
+                                    <div onClick={() => route('/home-care/subscriptions')} className={`flex space-x-2 ${window.location.pathname === '/home-care/subscriptions' && 'bg-blue-400'} items-center text-base dark:hover:bg-gray-800 px-2 py-1 rounded-lg cursor-pointer`}>
+                                        <span className={'cursor-pointer'}>Subscriptions</span>
+                                    </div>
                                 </>
                             }
                         </div>

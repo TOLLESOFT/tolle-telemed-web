@@ -2,8 +2,7 @@ import React, {useEffect, useState} from "react";
 import {LoginResponseModel} from "../shared/models/LoginResponseModel";
 import {ContextInterface} from "../shared/models/context-interface";
 import {BaseService} from "../shared/base.service";
-import {HubConnection, HubConnectionBuilder} from "@microsoft/signalr";
-import {environment} from "../shared/environment";
+import {HubConnection} from "@microsoft/signalr";
 
 export const AuthContext = React.createContext<ContextInterface>({
     canLogout: () => {},
@@ -32,7 +31,6 @@ export const AuthProvider = (props: any) => {
 
     useEffect(() => {
         let interval: NodeJS.Timeout | undefined;
-        let connect: HubConnection;
         let accessObj: LoginResponseModel = JSON.parse(localStorage.getItem(BaseService.key) as string) as LoginResponseModel;
         if (accessObj) {
             interval = setInterval(() => {
@@ -41,19 +39,6 @@ export const AuthProvider = (props: any) => {
                     window.location.href = '/';
                 }
             }, 3000);
-
-            // const url = `${environment.apiUrl}notificationHub?userId=${accessObj.user?.id}`;
-            //
-            // connect = new HubConnectionBuilder()
-            //     .withUrl(url)
-            //     .withAutomaticReconnect()
-            //     .build();
-            // connect.start()
-            //     .then(() => {
-            //         console.log('connection started ...');
-            //     }).catch( err => {
-            //     console.log('Error while starting connection ' + err);
-            // });
 
             if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
                 document.documentElement.classList.add('dark')

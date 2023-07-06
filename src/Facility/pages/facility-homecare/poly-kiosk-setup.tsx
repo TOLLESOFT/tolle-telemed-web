@@ -14,7 +14,7 @@ import {FormSelect} from "../../../shared/FormBuilder/form-select";
 import {FormImage} from "../../../shared/FormBuilder/form-image";
 import {FormDate} from "../../../shared/FormBuilder/form-date";
 import {FormCheckBox} from "../../../shared/FormBuilder/form-check-box";
-import {PiButton, PiMessage, PiModal, PiSelectList} from "toll-ui-react";
+import {PiButton, PiLoading, PiMessage, PiModal, PiSelectList} from "toll-ui-react";
 import {Builder} from "../../../shared/FormBuilder/builder";
 import {PiPagination} from "../../../shared/components/pi-pagination";
 
@@ -302,7 +302,7 @@ export default function PolyKioskSetup(){
                             <tr>
                                 <td colSpan={3}>
                                     <div className={'flex justify-center w-full'}>
-                                        <h1>loading ...</h1>
+                                        <PiLoading loading={loading}/>
                                     </div>
                                 </td>
                             </tr>

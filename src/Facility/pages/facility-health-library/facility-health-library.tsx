@@ -293,7 +293,7 @@ export default function FacilityHealthLibrary() {
                 openModal &&
                 <PiModal fullScreen={true} onClose={closeModalHandler}>
                     <div className={'h-full w-full flex flex-col'}>
-                        <div className={'h-auto w-full flex justify-end items-center'}>
+                        <div className={'h-auto w-full flex justify-end items-center p-1'}>
 
                             <i onClick={closeModalHandler} className={'pi pi-times cursor-pointer'}></i>
                         </div>
